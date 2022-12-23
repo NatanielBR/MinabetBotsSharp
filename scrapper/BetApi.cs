@@ -12,6 +12,6 @@ public abstract class BetApi {
         this.client = client;
     }
 
-    public abstract List<Event> ListEvents();
+    public abstract List<SportEvent> ListEvents();
 
 }

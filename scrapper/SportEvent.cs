@@ -1,6 +1,6 @@
 namespace MinabetBotsWeb.scrapper; 
 
-public class Event {
+public class SportEvent {
 
     public readonly string eventId;
     public readonly string champEventId;
@@ -13,7 +13,7 @@ public class Event {
     public readonly string sourceName;
     public readonly string url;
     
-    public Event(string eventId, string champEventId, string championshipId, string championshipName, DateTimeOffset dateStarted, string teamHomeName, string teamAwayName, EventOdds odds, string sourceName, string url) {
+    public SportEvent(string eventId, string champEventId, string championshipId, string championshipName, DateTimeOffset dateStarted, string teamHomeName, string teamAwayName, EventOdds odds, string sourceName, string url) {
         this.eventId = eventId;
         this.champEventId = champEventId;
         this.championshipId = championshipId;
@@ -37,8 +37,8 @@ public class EventOdds{
     public readonly double home_win_odds;
     public readonly double away_win_odds;
     public readonly double draw_odds;
-    public readonly double more2and5odds;
-    public readonly double less2and5odds;
+    public double more2and5odds;
+    public double less2and5odds;
 
     public EventOdds(double homeWinOdds, double awayWinOdds, double drawOdds, double more2And5Odds, double less2And5Odds) {
         home_win_odds = homeWinOdds;
