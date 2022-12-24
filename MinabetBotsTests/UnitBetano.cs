@@ -28,7 +28,8 @@ public class UnitBetano
                 Assert.That(item.odds?.home_win_odds, Is.Not.Zero.Or.Null);
                 Assert.That(item.odds?.away_win_odds, Is.Not.Zero.Or.Null);
                 Assert.That(item.odds?.draw_odds, Is.Not.Zero.Or.Null);
-
+                Assert.That(item.odds?.more2and5odds, Is.Not.Zero.Or.Null);
+                Assert.That(item.odds?.less2and5odds, Is.Not.Zero.Or.Null);
                 // Pode ser possivel que de erro ao pegar o mercado de gol
                 // Ou pode ser que esse mercado esteja encerrado
             });

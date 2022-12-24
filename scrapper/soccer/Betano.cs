@@ -34,9 +34,9 @@ namespace MinabetBotsWeb.scrapper.soccer
 
                         var odds = e.Markets?.Find(m => m.Name == "Resultado Final");
                         var more2and5odds = e.Markets?.Find(m => m.Name == "Total de Gols Mais/Menos");
-                        if (odds == null && more2and5odds == null) return;
+                        if (odds == null || more2and5odds == null) return;
                         var startDate = e.GetDateTime();
-                        var evento = new SportEvent(e.Id, e.LeagueId, e.RegionId, leagueName, startDate, e.Participants[0].Name, e.Participants[1].Name, new(odds.Selections[0].Price, odds.Selections[2].Price, odds.Selections[1].Price, more2and5odds?.Selections[0].Price ?? 0.0d, more2and5odds?.Selections[1].Price ?? 0.0d), webSiteName, $"{urlHome}{e.Url}");
+                        var evento = new SportEvent(e.Id, e.LeagueId, e.RegionId, leagueName, startDate, e.Participants[0].Name, e.Participants[1].Name, new(odds.Selections[0].Price, odds.Selections[2].Price, odds.Selections[1].Price, more2and5odds.Selections[0].Price, more2and5odds.Selections[1].Price), webSiteName, $"{urlHome}{e.Url}");
                         events.Add(evento);
                     });
                 });
