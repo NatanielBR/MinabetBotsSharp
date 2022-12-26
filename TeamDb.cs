@@ -9,7 +9,7 @@ public class TeamDb {
     private double minRatio;
     private int changeFire;
 
-    public event EventHandler<List<SportEvent>> OnChange;
+    public event EventHandler<string> OnChange;
 
     public ConcurrentDictionary<string, List<SportEvent>> eventMap = new();
     private JaroWinkler similarity = new();
@@ -40,10 +40,20 @@ public class TeamDb {
                 events.Add(item);
 
                 if (events.Count >= changeFire) {
-                    OnChange.Invoke(null, events);
+                    OnChange.Invoke(null, found.Value.Key);
                 }
             }
         });
+    }
+
+    public List<SportEvent> this[string key] {
+        get {
+            return eventMap[key];
+        }
+
+        set {
+            eventMap[key] = value;
+        }
     }
 
     private KeyValuePair<string, double>? findKey(SportEvent sportEvent) {

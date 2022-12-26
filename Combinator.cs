@@ -1,22 +1,63 @@
-using System.Collections.Specialized;
-using Microsoft.VisualBasic;
 using MinabetBotsWeb.scrapper;
 
 namespace MinabetBotsWeb;
 
 public class Combinator {
     private string eventType;
+    private TeamDb _teamDb;
 
+    public event EventHandler<Event3Combination> OnNewSurebet;
+
+    private Dictionary<string, Event3Combination> map = new();
     public Combinator(string eventType, TeamDb teamDb) {
         this.eventType = eventType;
         teamDb.OnChange += OnChange;
+        _teamDb = teamDb;
     }
 
-    private List<ThreeValues<CombinationItem>> OnChange(Object? sender, List<SportEvent> sportEvents) {
+    private void OnChange(Object? sender, string sportEventName) {
+        var value = _teamDb[sportEventName];
 
+        if (value.Count < 3) return;
+
+        var combination = FindBestCombination(value, value[0], sportEventName);
+        map.TryGetValue(sportEventName, out var lastCombination);
+
+        // C# Avisou que comparar float pode dar merda, então estou comparando e checando se a diferença é menor que 0.1
+        if (lastCombination == null) {
+            map[sportEventName] = combination;
+
+            var text = $"↑ {combination.Surebet} -> {combination.EventJson.TeamHomeName} - {combination.EventJson.TeamAwayName}";
+
+            Console.Out.WriteLine(text);
+
+            OnNewSurebet.Invoke(this, combination);
+        } else if (Math.Abs(lastCombination.Surebet - combination.Surebet) > 0.1 ||
+                   // 2 minutos = 60 * 2
+                   (lastCombination.Created.ToUnixTimeSeconds() - combination.Created.ToUnixTimeSeconds()) > 120) {
+            map[sportEventName] = combination;
+
+            var code = '=';
+
+            if (combination.Surebet > lastCombination.Surebet) {
+                code = '↑';
+            } else if (combination.Surebet < lastCombination.Surebet) {
+                code = '↓';
+            }
+
+            var text = $"{code} {combination.Surebet} -> {combination.EventJson.TeamHomeName} - {combination.EventJson.TeamAwayName}";
+
+            Console.Out.WriteLine(text);
+
+            OnNewSurebet.Invoke(this, combination);
+        } else if (
+            // 5 minutos = 60 * 5
+            (lastCombination.Created.ToUnixTimeSeconds() - combination.Created.ToUnixTimeSeconds()) > 300) {
+            map.Remove(sportEventName);
+        }
     }
 
-    private List<ThreeValues<CombinationItem>> Combine(List<CombinationItem> combinationItems) {
+    private IEnumerable<ThreeValues<CombinationItem>> Combine(IReadOnlyList<CombinationItem> combinationItems) {
         List<ThreeValues<CombinationItem>> result = new();
 
         if (combinationItems.Count <= 3) {
@@ -37,10 +78,11 @@ public class Combinator {
                     var opts = "";
 
                     {
-                        var _opts = new List<String>();
-                        _opts.Add($"{threeValues.One?.SourceName}_{threeValues.One?.Label}");
-                        _opts.Add($"{threeValues.Two?.SourceName}_{threeValues.Two?.Label}");
-                        _opts.Add($"{threeValues.Three?.SourceName}_{threeValues.Three?.Label}");
+                        var _opts = new List<string> {
+                            $"{threeValues.One?.SourceName}_{threeValues.One?.Label}",
+                            $"{threeValues.Two?.SourceName}_{threeValues.Two?.Label}",
+                            $"{threeValues.Three?.SourceName}_{threeValues.Three?.Label}"
+                        };
 
                         opts = String.Join(" ", _opts);
                     }
@@ -51,12 +93,14 @@ public class Combinator {
                     if (found == null) {
                         break;
                     }
-                    
+
+                    nList.Remove(found);
+
                     threeValues.Add(found);
                 } while (threeValues.HasSpace());
 
                 if (!threeValues.HasSpace()) {
-                    result.Add(threeValues.build());
+                    result.Add(threeValues.Build());
                 }
             }
         }
@@ -64,9 +108,52 @@ public class Combinator {
         return result;
     }
 
-    private void FindBestCombination(List<SportEvent> sportEvents) {
+    private Event3Combination FindBestCombination(IEnumerable<SportEvent> sportEvents, SportEvent sportEvent, string key) {
+        var nList = new List<SportEvent>();
+        nList.AddRange(sportEvents);
 
+        var allCombination = Combine(sportEvents.SelectMany(it => {
+                var list = new List<KeyValuePair<double, string>>();
+
+                list.Add(KeyValuePair.Create(it.odds.home_win_odds, "home"));
+                list.Add(KeyValuePair.Create(it.odds.draw_odds, "draw"));
+                list.Add(KeyValuePair.Create(it.odds.away_win_odds, "away"));
+
+                return list.Select(it2 => new CombinationItem(it2.Key, it2.Value, it.sourceName));
+            }).ToList()
+        );
+
+        var bestCombination = allCombination.MaxBy(it =>
+            /* p */100 * (
+                /* o */ (1 / (
+                    /* r */ (1 / it.One.Odd + 1 / it.Two.Odd + 1 / it.Three.Odd)
+                    /*o */ * it.One.Odd))
+                /* p */ * it.One.Odd - 1));
+
+        var converted = new List<CombinationItem>();
+        converted.Add(bestCombination.One);
+        converted.Add(bestCombination.Two);
+        converted.Add(bestCombination.Three);
+
+        var surebet = /* p */ ((
+            /* o */ (1 / (
+                /* r */ (1 / bestCombination.One.Odd + 1 / bestCombination.Two.Odd + 1 / bestCombination.Three.Odd)
+                /* o */ * bestCombination.One.Odd))
+            /* p */ * bestCombination.One.Odd - 1));
+
+        return new Event3Combination(
+            sportEvent.ToEventJson(),
+            converted.Select(it => new CombinationOdds(
+                it.Label,
+                it.Odd,
+                nList.First(it2 => it2.sourceName == it.SourceName).ToEventJson()
+            )).ToList(),
+            surebet,
+            key,
+            eventType
+        );
     }
+
 }
 
 class ThreeValues<T> {
@@ -106,8 +193,8 @@ class ThreeValuesNullable<T> {
         }
     }
 
-    public ThreeValues<T> build() {
-        return new(One, Two, Three);
+    public ThreeValues<T> Build() {
+        return new(One!, Two!, Three!);
     }
 }
 
@@ -135,6 +222,58 @@ class CombinationItem {
     }
 }
 
-class Event3Combination {
-    var e
+public class Event3Combination {
+    public SportEventJson EventJson { get; }
+    public List<CombinationOdds> Combinations { get; }
+    public double Surebet { get; }
+    public string EventCode { get; }
+    public string EventType { get; }
+
+    public DateTimeOffset Created = DateTimeOffset.Now;
+
+    public Event3Combination(SportEventJson eventJson, List<CombinationOdds> combinations, double surebet, string eventCode, string eventType) {
+        this.EventJson = eventJson;
+        Combinations = combinations;
+        Surebet = surebet;
+        EventCode = eventCode;
+        EventType = eventType;
+    }
+}
+
+public class CombinationOdds {
+    public string Label { get; }
+    public double Odds { get; }
+    public SportEventJson EventJson { get; }
+
+    public CombinationOdds(string label, double odds, SportEventJson eventJson) {
+        Label = label;
+        Odds = odds;
+        EventJson = eventJson;
+    }
+}
+
+public class SportEventJson {
+    private string EventId { get; }
+    private string ChampEventId { get; }
+    private string ChampionshipId { get; }
+    private string ChampionshipName { get; }
+    private string DateStared { get; } // iso
+    public string TeamHomeName { get; }
+    public string TeamAwayName { get; }
+    private EventOdds Odds { get; }
+    private string SourceName { get; }
+    private string Url { get; }
+
+    public SportEventJson(string eventId, string champEventId, string championshipId, string championshipName, string dateStared, string teamHomeName, string teamAwayName, EventOdds odds, string sourceName, string url) {
+        EventId = eventId;
+        ChampEventId = champEventId;
+        ChampionshipId = championshipId;
+        ChampionshipName = championshipName;
+        DateStared = dateStared;
+        TeamHomeName = teamHomeName;
+        TeamAwayName = teamAwayName;
+        Odds = odds;
+        SourceName = sourceName;
+        Url = url;
+    }
 }

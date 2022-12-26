@@ -1,14 +1,21 @@
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices.ComTypes;
 using F23.StringSimilarity;
-using F23.StringSimilarity.Experimental;
-using F23.StringSimilarity.Interfaces;
 using MinabetBotsWeb;
 using MinabetBotsWeb.scrapper;
 
 namespace MinabetBotsTest;
 
 public class UnitTeamDb {
-    public static SportEvent CreateTestEvent(DateTimeOffset date, string teamHome, string teamAway, string sourceName) {
+    public static SportEvent CreateTestEvent(
+        DateTimeOffset date,
+        string teamHome,
+        string teamAway,
+        string sourceName,
+        double homeWinOdds = 0.0d,
+        double drawOdds = 0.0d,
+        double awayWinOdds = 0.0d
+        ) {
         return new(
             "",
             "",
@@ -18,9 +25,9 @@ public class UnitTeamDb {
             teamHome,
             teamAway,
             new(
-                0.0d,
-                0.0d,
-                0.0d,
+                homeWinOdds,
+                awayWinOdds,
+                drawOdds,
                 0.0d,
                 0.0d
             ),
@@ -70,7 +77,7 @@ public class UnitTeamDb {
 
         teamDb.OnChange += (_, item) => {
             fired = true;
-            Assert.True(item.Count >= 3);
+            Assert.True(item.Length >= 3);
         };
 
         var list = new List<SportEvent>();
@@ -88,5 +95,47 @@ public class UnitTeamDb {
             Assert.That(teamDb.eventMap.First().Value.Count >= 3, Is.True);
             Assert.That(fired, Is.True);
         });
+    }
+
+    [Test]
+    public void TestCombinator() {
+        var teamDb = new TeamDb(changeFire: 3);
+        var combinator = new Combinator("soccer", teamDb);
+
+        combinator.OnNewSurebet += (_, combination) => {
+            Assert.Multiple(() => {
+                Assert.That(Math.Abs(combination.Combinations.First(it => it.Label == "draw").Odds - 2.0) == 0, Is.True);
+                Assert.That(Math.Abs(combination.Combinations.First(it => it.Label == "home").Odds - 5.0) == 0, Is.True);
+                Assert.That(Math.Abs(combination.Combinations.First(it => it.Label == "away").Odds - 4.5) == 0, Is.True);
+            });
+            
+            combination.Combinations.ForEach(item => {
+                Console.Out.WriteLine($"Label: {item.Label}");
+                Console.Out.WriteLine($"Label: {item.Odds}");
+            });
+        };
+        
+        var date = DateTimeOffset.Now;
+        var list = new List<SportEvent> {
+            CreateTestEvent(date, "Al Kuwait SC Sub-21", "Al Salmiyah SC Sub-21", "Casa A",
+                homeWinOdds:4.0,
+                drawOdds:1.0,
+                awayWinOdds:4.5
+                ),
+            CreateTestEvent(date, "Al-Kuwait Sub-21", "Al Salmiya Sub-21", "Casa B",
+                homeWinOdds:3.0,
+                drawOdds:2.0,
+                awayWinOdds:4.0
+            ),
+            CreateTestEvent(date, "Al-Kuwait Sub-21", "Al Salmiya Sub-21", "Casa C",
+                homeWinOdds:5.0,
+                drawOdds:1.0,
+                awayWinOdds:5.0
+            ),
+        };
+
+        teamDb.PutAll(list);
+
+        
     }
 }

@@ -1,4 +1,4 @@
-namespace MinabetBotsWeb.scrapper; 
+namespace MinabetBotsWeb.scrapper;
 
 public class SportEvent {
 
@@ -12,7 +12,7 @@ public class SportEvent {
     public readonly EventOdds? odds;
     public readonly string sourceName;
     public readonly string url;
-    
+
     public SportEvent(string eventId, string champEventId, string championshipId, string championshipName, DateTimeOffset dateStarted, string teamHomeName, string teamAwayName, EventOdds odds, string sourceName, string url) {
         this.eventId = eventId;
         this.champEventId = champEventId;
@@ -25,15 +25,28 @@ public class SportEvent {
         this.sourceName = sourceName;
         this.url = url;
     }
-    
-    
+
+    public SportEventJson ToEventJson() {
+        return new SportEventJson(
+            eventId,
+            champEventId,
+            championshipId,
+            championshipName,
+            dateStarted?.ToString("O"),
+            teamHomeName,
+            teamAwayName,
+            odds,
+            sourceName,
+            url
+        );
+    }
 
     public override string ToString() {
         return $"{nameof(eventId)}: {eventId}, {nameof(champEventId)}: {champEventId}, {nameof(championshipId)}: {championshipId}, {nameof(championshipName)}: {championshipName}, {nameof(dateStarted)}: {dateStarted}, {nameof(teamHomeName)}: {teamHomeName}, {nameof(teamAwayName)}: {teamAwayName}, {nameof(odds)}: {odds}, {nameof(sourceName)}: {sourceName}, {nameof(url)}: {url}";
     }
 }
 
-public class EventOdds{
+public class EventOdds {
     public readonly double home_win_odds;
     public readonly double away_win_odds;
     public readonly double draw_odds;
