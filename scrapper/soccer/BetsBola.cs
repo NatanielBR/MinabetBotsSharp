@@ -88,7 +88,7 @@ public class BetsBola : BetApi {
                                 0.0d,
                                 0.0d
                             ),
-                            webSiteName
+                            WebSiteName
                             ,
                             $"{urlBase}{WebUtility.HtmlDecode(eventEl.SelectSingleNode(".//a[@class='totalOutcomes-button']").Attributes["href"].Value[2..])}"
                         );

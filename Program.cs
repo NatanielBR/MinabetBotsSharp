@@ -1,18 +1,42 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using MinabetBotsWeb;
+using MinabetBotsWeb.scrapper;
 using MinabetBotsWeb.scrapper.soccer;
-using System.Diagnostics;
 
-var betsBola = new BetsBola(new HttpClient());
-var betano = new Betano(new HttpClient());
-var pansudo = new Pansudo(new HttpClient());
-var timer = new Stopwatch();
+var teamDb = new TeamDb(changeFire: 3);
+var combinator = new Combinator("soccer", teamDb);
+var web = new HttpClient();
 
-timer.Start();
-Console.WriteLine($"Program Start - {timer.Elapsed}");
+combinator.OnNewSurebet += (_, combination) => {
 
-//Console.Out.WriteLine(String.Join("\n", betsBola.ListEvents().Select(item => item.ToString())));
-//Console.Out.WriteLine(String.Join("\n", betano.ListEvents().Select(item => item.ToString())));
-Console.Out.WriteLine(String.Join("\n", pansudo.ListEvents().Select(item => item.ToString())));
-timer.Stop();
-Console.WriteLine($"Program End - {timer.Elapsed}");
+    Console.Out.WriteLine($"Team Home: {combination.EventJson.TeamHomeName}");
+    Console.Out.WriteLine($"Team Away: {combination.EventJson.TeamAwayName}");
+    Console.Out.WriteLine($"Surebet: {combination.Surebet}");
+
+    combination.Combinations.ForEach(item => {
+        Console.Out.WriteLine($"\tLabel: {item.Label}");
+        Console.Out.WriteLine($"\tOdd: {item.Odds}");
+    });
+};
+
+var betApis = new List<BetApi> {
+    new BetsBola(web),
+    new Betano(web),
+    new Pansudo(web),
+};
+
+while (true) {
+    Console.Out.WriteLine("Processando eventos...");
+    
+    betApis.ForEach(betApi => {
+        Console.Out.WriteLine($"Processando {betApi.WebSiteName}");
+
+        var elements = betApi.ListEvents();
+        teamDb.PutAll(elements);
+        
+        Console.Out.WriteLine($"Processado {betApi.WebSiteName}");
+    });
+    
+    Thread.Sleep(500);
+}
