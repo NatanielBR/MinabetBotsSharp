@@ -97,6 +97,20 @@ public class UnitTeamDb {
         });
     }
 
+    /**
+     * _Bug acontece quando add 2 eventos diferentes, nos testes eu usei só o mesmo evento e com pequenas variações
+     */
+    [Test]
+    public void TestBugTeamDB() {
+        var teamDb = new TeamDb();
+        var date = DateTimeOffset.Now;
+        
+        teamDb.PutAll(new () {
+            CreateTestEvent(date, "Al Kuwait SC Sub-21", "Al Salmiyah SC Sub-21", "Casa A"),
+            CreateTestEvent(date, "São Paulo", "Flamengo", "Casa B")
+        });
+    }
+
     [Test]
     public void TestCombinator() {
         var teamDb = new TeamDb(changeFire: 3);

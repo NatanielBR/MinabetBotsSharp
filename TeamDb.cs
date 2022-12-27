@@ -71,7 +71,13 @@ public class TeamDb {
             .Select(item => KeyValuePair.Create(
                 item, similarity.Distance(eventName, item)))
             .Where(item => item.Value <= minRatio)
-            .MinBy(item => item.Value);
+            .MinBySafe(item => item.Value);
+
+        // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (result.Key == null) {
+            return null;
+        }
+        // ReSharper restore ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
         return result;
     }
