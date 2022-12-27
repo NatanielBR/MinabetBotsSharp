@@ -10,14 +10,14 @@ var web = new HttpClient();
 
 combinator.OnNewSurebet += (_, combination) => {
 
-    Console.Out.WriteLine($"Team Home: {combination.EventJson.TeamHomeName}");
-    Console.Out.WriteLine($"Team Away: {combination.EventJson.TeamAwayName}");
-    Console.Out.WriteLine($"Surebet: {combination.Surebet}");
-
-    combination.Combinations.ForEach(item => {
-        Console.Out.WriteLine($"\tLabel: {item.Label}");
-        Console.Out.WriteLine($"\tOdd: {item.Odds}");
-    });
+    // Console.Out.WriteLine($"Team Home: {combination.EventJson.TeamHomeName}");
+    // Console.Out.WriteLine($"Team Away: {combination.EventJson.TeamAwayName}");
+    // Console.Out.WriteLine($"Surebet: {combination.Surebet}");
+    //
+    // combination.Combinations.ForEach(item => {
+    //     Console.Out.WriteLine($"\tLabel: {item.Label}");
+    //     Console.Out.WriteLine($"\tOdd: {item.Odds}");
+    // });
 };
 
 var betApis = new List<BetApi> {
@@ -36,7 +36,7 @@ while (true) {
         teamDb.PutAll(elements);
         
         Console.Out.WriteLine($"Processado {betApi.WebSiteName}");
+        Thread.Sleep(4000);
     });
     
-    Thread.Sleep(500);
 }
