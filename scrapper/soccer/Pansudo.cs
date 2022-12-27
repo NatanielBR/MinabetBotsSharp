@@ -11,7 +11,9 @@ namespace MinabetBotsWeb.scrapper.soccer
         private CultureInfo brazilCulture = new("pt-BR");
         private string urlBase = "https://pansudopokervip.com/";
 
-        public Pansudo(HttpClient client) : base("Betano", "https://pansudopokervip.com", client) { }
+        public Pansudo(HttpClient client) : base("Betano", "https://pansudopokervip.com", client) {
+            client.BaseAddress = new(urlBase);
+        }
         public override List<SportEvent> ListEvents()
         {
             var events = GetEvents().Result;
@@ -32,7 +34,6 @@ namespace MinabetBotsWeb.scrapper.soccer
 
         private async Task<List<PansudoApiDataResponse>> GetEvents()
         {
-            client.BaseAddress = new Uri(urlBase);
             var response = await client.GetAsync("/futebolapi/api/CampJogo/getEvents/1");
             var responseDataString = await response.Content.ReadAsStringAsync();
             var data = JsonConvert.DeserializeObject<List<PansudoApiDataResponse>>(responseDataString);
