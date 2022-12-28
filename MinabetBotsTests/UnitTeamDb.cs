@@ -3,6 +3,8 @@ using System.Runtime.InteropServices.ComTypes;
 using F23.StringSimilarity;
 using MinabetBotsWeb;
 using MinabetBotsWeb.scrapper;
+using MinabetBotsWeb.scrapper.soccer;
+using Newtonsoft.Json;
 
 namespace MinabetBotsTest;
 
@@ -15,7 +17,7 @@ public class UnitTeamDb {
         double homeWinOdds = 0.0d,
         double drawOdds = 0.0d,
         double awayWinOdds = 0.0d
-        ) {
+    ) {
         return new(
             "",
             "",
@@ -104,8 +106,8 @@ public class UnitTeamDb {
     public void TestBugTeamDB() {
         var teamDb = new TeamDb();
         var date = DateTimeOffset.Now;
-        
-        teamDb.PutAll(new () {
+
+        teamDb.PutAll(new() {
             CreateTestEvent(date, "Al Kuwait SC Sub-21", "Al Salmiyah SC Sub-21", "Casa A"),
             CreateTestEvent(date, "São Paulo", "Flamengo", "Casa B")
         });
@@ -122,34 +124,64 @@ public class UnitTeamDb {
                 Assert.That(Math.Abs(combination.Combinations.First(it => it.Label == "home").Odds - 5.0) == 0, Is.True);
                 Assert.That(Math.Abs(combination.Combinations.First(it => it.Label == "away").Odds - 4.5) == 0, Is.True);
             });
-            
+
             combination.Combinations.ForEach(item => {
                 Console.Out.WriteLine($"Label: {item.Label}");
                 Console.Out.WriteLine($"Label: {item.Odds}");
             });
         };
-        
+
         var date = DateTimeOffset.Now;
+
         var list = new List<SportEvent> {
             CreateTestEvent(date, "Al Kuwait SC Sub-21", "Al Salmiyah SC Sub-21", "Casa A",
-                homeWinOdds:4.0,
-                drawOdds:1.0,
-                awayWinOdds:4.5
-                ),
+                homeWinOdds: 4.0,
+                drawOdds: 1.0,
+                awayWinOdds: 4.5
+            ),
             CreateTestEvent(date, "Al-Kuwait Sub-21", "Al Salmiya Sub-21", "Casa B",
-                homeWinOdds:3.0,
-                drawOdds:2.0,
-                awayWinOdds:4.0
+                homeWinOdds: 3.0,
+                drawOdds: 2.0,
+                awayWinOdds: 4.0
             ),
             CreateTestEvent(date, "Al-Kuwait Sub-21", "Al Salmiya Sub-21", "Casa C",
-                homeWinOdds:5.0,
-                drawOdds:1.0,
-                awayWinOdds:5.0
+                homeWinOdds: 5.0,
+                drawOdds: 1.0,
+                awayWinOdds: 5.0
             ),
         };
 
         teamDb.PutAll(list);
 
-        
+
     }
+
+    // [Test]
+    // public void TestStringSimilarity() {
+    //     // JaroWinkler similarity = new();
+    //     // Console.Out.WriteLine("Tigres UANL x Club Santos Laguna");
+    //     // Console.Out.WriteLine("Cruz Azul x CF America");
+    //     // Console.Out.WriteLine(similarity.Distance("Tigres UANL x Club Santos Laguna", "Cruz Azul x CF America"));
+    //     //
+    //     // Console.Out.WriteLine("Al Kuwait SC x Al Salmiyah SC");
+    //     // Console.Out.WriteLine("Al-Kuwait Sub-21 x Al Salmiya Sub-21");
+    //     // Console.Out.WriteLine(similarity.Distance("Al Kuwait SC x Al Salmiyah SC", "Al-Kuwait Sub-21 x Al Salmiya Sub-21"));
+    //     
+    //     var web = new HttpClient();
+    //     var teamDb = new TeamDb(minRatio: 0.18);
+    //
+    //     var betApis = new List<BetApi> {
+    //         new BetsBola(web),
+    //         new Betano(web),
+    //         new Pansudo(web),
+    //     };
+    //     
+    //     betApis.ForEach(item => {
+    //         var filePath = $"{Path.GetTempPath()}{item.WebSiteName}_events_test.json";
+    //     
+    //         var events = JsonConvert.DeserializeObject<List<SportEvent>>(File.ReadAllText(filePath));
+    //     
+    //         teamDb.PutAll(events);
+    //     });
+    // }
 }

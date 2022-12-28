@@ -9,7 +9,7 @@ public class TeamDb {
     private double minRatio;
     private int changeFire;
 
-    public event EventHandler<string> OnChange;
+    public event EventHandler<string>? OnChange;
 
     public ConcurrentDictionary<string, List<SportEvent>> eventMap = new();
     private JaroWinkler similarity = new();
@@ -40,7 +40,7 @@ public class TeamDb {
                 events.Add(item);
 
                 if (events.Count >= changeFire) {
-                    OnChange.Invoke(null, found.Value.Key);
+                    OnChange?.Invoke(null, found.Value.Key);
                 }
             }
         });
@@ -59,17 +59,19 @@ public class TeamDb {
     private KeyValuePair<string, double>? findKey(SportEvent sportEvent) {
         KeyValuePair<string, double> result;
 
-        var eventName = FormatEvent(sportEvent);
-        var dateStart = eventName.Split(" - ")[0];
+        var dateStart = sportEvent.dateStarted?.ToUnixTimeSeconds();
 
         if (eventMap.Keys.Count == 0) {
             return null;
         }
 
         result = eventMap.Keys
-            .Where(item => FormatEvent(sportEvent).StartsWith(dateStart))
+            .Where(item => Int32.Parse(item.Split(" - ", 2)[0]) == dateStart)
+            .Select(item => KeyValuePair.Create(item, item.Split(" - ", 2)[1].Split(" x ")))
             .Select(item => KeyValuePair.Create(
-                item, similarity.Distance(eventName, item)))
+                item.Key,
+                ( similarity.Distance(sportEvent.teamHomeName, item.Value[0]) + similarity.Distance(sportEvent.teamAwayName, item.Value[1]) ) / 2
+            ))
             .Where(item => item.Value <= minRatio)
             .MinBySafe(item => item.Value);
 
