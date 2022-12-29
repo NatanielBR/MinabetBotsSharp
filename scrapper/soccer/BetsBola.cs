@@ -45,7 +45,7 @@ public class BetsBola : BetApi {
 
                     // Odds 1x2
                     var oddsValues = eventEl.SelectNodes(".//a[@class='odd']")
-                        .Select(item => Double.Parse(item.InnerText.Replace(",", "."))).ToList();
+                        .Select(item => Double.Parse(item.InnerText.Replace(",", "."), CultureInfo.InvariantCulture)).ToList();
 
                     try {
                         var eventO = new SportEvent(
