@@ -4,6 +4,7 @@
     &lt;TestId&gt;NUnit3x::C68ADE29-84E8-4481-850A-56416F911486::net7.0::MinabetBotsTest.Tests.TestListAllEvents&lt;/TestId&gt;
     &lt;TestId&gt;NUnit3x::C68ADE29-84E8-4481-850A-56416F911486::net7.0::MinabetBotsTest.UnitTeamDb.TestCombinator&lt;/TestId&gt;
     &lt;TestId&gt;NUnit3x::C68ADE29-84E8-4481-850A-56416F911486::net7.0::MinabetBotsTest.UnitTeamDb&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::C68ADE29-84E8-4481-850A-56416F911486::net7.0::MinabetBotsTest.Tests.TestDateInNewYear&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
 	</wpf:ResourceDictionary>

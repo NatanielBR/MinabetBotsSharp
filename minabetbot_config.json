@@ -1,0 +1,4 @@
+{
+	"DjangoUrl": "http://localhost:8000",
+	"EventType": "soccer"
+}

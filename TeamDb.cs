@@ -59,7 +59,7 @@ public class TeamDb {
     private KeyValuePair<string, double>? findKey(SportEvent sportEvent) {
         KeyValuePair<string, double> result;
 
-        var dateStart = sportEvent.dateStarted?.ToUnixTimeSeconds();
+        var dateStart = sportEvent.dateStarted?.ToOffset(TimeSpan.Zero).ToUnixTimeSeconds();
 
         if (eventMap.Keys.Count == 0) {
             return null;
@@ -85,6 +85,6 @@ public class TeamDb {
     }
 
     private string FormatEvent(SportEvent item) {
-        return $"{item.dateStarted?.ToUnixTimeSeconds()} - {item.teamHomeName} x {item.teamAwayName}";
+        return $"{item.dateStarted?.ToOffset(TimeSpan.Zero).ToUnixTimeSeconds()} - {item.teamHomeName} x {item.teamAwayName}";
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.Net.Http.Json;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
+using System.Net.Http.Json;
 using System.Text;
 using MinabetBotsWeb.scrapper;
 using MinabetBotsWeb.scrapper.soccer;
@@ -6,12 +8,15 @@ using Newtonsoft.Json;
 
 namespace MinabetBotsWeb;
 
-public class Program {
+public class Program
+{
+    private static HttpClient HttpClient = new();
+    
+    [SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH", MessageId = "type: HtmlAgilityPack.HtmlNode")]
     public static void Main(string[] args) {
         // See https://aka.ms/new-console-template for more information
 
         var teamDb = new TeamDb(minRatio: 0.18, changeFire: 3);
-        var web = new HttpClient();
         var text = "";
 
         if (File.Exists("minabetbot_config.json")) {
@@ -23,18 +28,16 @@ public class Program {
         Console.Out.WriteLine("Carregado configuração:");
         Console.Out.WriteLine(programConfig.ToString());
 
-        combinator.OnNewSurebet += (_, combination) => {
+        combinator.OnNewSurebet += async (_, combination) => {
             var jsonData = new StringContent(JsonConvert.SerializeObject(combination),
                 Encoding.UTF8,
                 "application/json");
             jsonData.Headers.Add("bot-id", "aYvagG1zygWWKz0duUSj");
 
             // var result = 
-            web.PostAsync($"{programConfig.DjangoUrl}/bot/events",
+            await HttpClient.PostAsync($"{programConfig.DjangoUrl}/bot/events",
                 jsonData
             );
-
-            // Console.Out.WriteLine("");
             // Console.Out.WriteLine($"Team Home: {combination.EventJson.TeamHomeName}");
             // Console.Out.WriteLine($"Team Away: {combination.EventJson.TeamAwayName}");
             // Console.Out.WriteLine($"Surebet: {combination.Surebet}");
@@ -46,9 +49,9 @@ public class Program {
         };
 
         var betApis = new List<BetApi> {
-            new BetsBola(web),
-            new Betano(web),
-            new Pansudo(web),
+            new BetsBola(),
+            new Betano(),
+            new Pansudo(),
         };
 
         while (true) {
@@ -57,10 +60,16 @@ public class Program {
             betApis.ForEach(betApi => {
                 Console.Out.WriteLine($"Processando {betApi.WebSiteName}");
 
-                var elements = betApi.ListEvents();
+                try {
+                    var elements = betApi.ListEvents();
 
-                Console.Out.WriteLine($"Pegue: {elements.Count} itens");
-                teamDb.PutAll(elements);
+                    Console.Out.WriteLine($"Pegue: {elements.Count} itens");
+                    teamDb.PutAll(elements);
+                } catch (Exception err) {
+                    Console.Out.WriteLine("Falha ao pegar os dados");
+                    Console.Out.WriteLine($"Erro: {err.Message}");
+                    Console.Out.WriteLine($"StackTrace:\n{err.StackTrace}");
+                }
 
                 Console.Out.WriteLine($"Processado {betApi.WebSiteName}");
                 Thread.Sleep(4000);
