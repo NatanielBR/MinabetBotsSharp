@@ -22,7 +22,7 @@ public class Tests {
 
     [Test]
     public void TestListAllEvents() {
-        var betsbola = new BetsBola(new());
+        var betsbola = new BetsBola();
 
         var events = betsbola.ListEvents();
 

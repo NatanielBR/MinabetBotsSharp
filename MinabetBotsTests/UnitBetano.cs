@@ -7,7 +7,7 @@ public class UnitBetano
     [Test]
     public void TestListAllEvents()
     {
-        var betano = new Betano(new());
+        var betano = new Betano();
 
         var events = betano.ListEvents();
 

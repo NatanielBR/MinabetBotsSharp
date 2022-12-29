@@ -5,9 +5,9 @@ using Newtonsoft.Json;
 var web = new HttpClient();
 
 var betApis = new List<BetApi> {
-    new BetsBola(web),
-    new Betano(web),
-    new Pansudo(web),
+    new BetsBola(),
+    new Betano(),
+    new Pansudo(),
 };
 
 betApis.ForEach(item => {

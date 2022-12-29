@@ -7,7 +7,7 @@ public class UnitPansudo
     [Test]
     public void TestListAllEvents()
     {
-        var pansudo = new Pansudo(new());
+        var pansudo = new Pansudo();
 
         var events = pansudo.ListEvents();
 
