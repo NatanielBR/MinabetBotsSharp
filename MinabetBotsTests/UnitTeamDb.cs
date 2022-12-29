@@ -156,32 +156,23 @@ public class UnitTeamDb {
 
     }
 
-    // [Test]
-    // public void TestStringSimilarity() {
-    //     // JaroWinkler similarity = new();
-    //     // Console.Out.WriteLine("Tigres UANL x Club Santos Laguna");
-    //     // Console.Out.WriteLine("Cruz Azul x CF America");
-    //     // Console.Out.WriteLine(similarity.Distance("Tigres UANL x Club Santos Laguna", "Cruz Azul x CF America"));
-    //     //
-    //     // Console.Out.WriteLine("Al Kuwait SC x Al Salmiyah SC");
-    //     // Console.Out.WriteLine("Al-Kuwait Sub-21 x Al Salmiya Sub-21");
-    //     // Console.Out.WriteLine(similarity.Distance("Al Kuwait SC x Al Salmiyah SC", "Al-Kuwait Sub-21 x Al Salmiya Sub-21"));
-    //     
-    //     var web = new HttpClient();
-    //     var teamDb = new TeamDb(minRatio: 0.18);
-    //
-    //     var betApis = new List<BetApi> {
-    //         new BetsBola(web),
-    //         new Betano(web),
-    //         new Pansudo(web),
-    //     };
-    //     
-    //     betApis.ForEach(item => {
-    //         var filePath = $"{Path.GetTempPath()}{item.WebSiteName}_events_test.json";
-    //     
-    //         var events = JsonConvert.DeserializeObject<List<SportEvent>>(File.ReadAllText(filePath));
-    //     
-    //         teamDb.PutAll(events);
-    //     });
-    // }
+    [Test]
+    public void TestMatchs() {
+        var web = new HttpClient();
+        var teamDb = new TeamDb(minRatio: 0.18);
+    
+        var betApis = new List<BetApi> {
+            new BetsBola(web),
+            new Betano(web),
+            new Pansudo(web),
+        };
+        
+        betApis.ForEach(item => {
+            var filePath = $"{Path.GetTempPath()}{item.WebSiteName}_events_test.json";
+        
+            var events = JsonConvert.DeserializeObject<List<SportEvent>>(File.ReadAllText(filePath));
+        
+            teamDb.PutAll(events);
+        });
+    }
 }

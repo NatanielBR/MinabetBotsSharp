@@ -4,6 +4,23 @@ namespace MinabetBotsTest;
 
 public class Tests {
     [Test]
+    public void TestDateInNewYear() {
+        var actualYear = DateTimeOffset.Now.Year;
+
+        Assert.AreEqual(
+            $"{actualYear}-12-29T16:45:00.0000000-03:00",
+            BetsBola.ParseBetsBolaDateToDateTimeOffset("29/dez", "16:45")
+                .ToString("O")
+        );
+
+        Assert.AreEqual(
+            $"{actualYear + 1}-01-01T12:00:00.0000000-03:00",
+            BetsBola.ParseBetsBolaDateToDateTimeOffset("01/jan", "12:00")
+                .ToString("O")
+        );
+    }
+
+    [Test]
     public void TestListAllEvents() {
         var betsbola = new BetsBola(new());
 
