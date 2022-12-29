@@ -8,7 +8,7 @@ namespace MinabetBotsWeb.scrapper.soccer;
 
 public class BetsBola : BetApi {
     private HtmlWeb web = new();
-    private CultureInfo brazilCulture = new("pt-BR");
+    private static CultureInfo brazilCulture = new("pt-BR");
     private string urlBase = "https://betsbola.com/sistema_v2/usuarios/simulador/desktop/";
 
     public BetsBola(HttpClient client)
@@ -22,7 +22,7 @@ public class BetsBola : BetApi {
         // Para cada url
         urls.ForEach(item => {
             // exp: https://betsbola.com/Jogos.aspx?idesporte=102&idcampeonato=100003512
-            var doc = web.Load($"{urlBase}{item}");
+            var doc = web.Load($"{urlBase}{item[1..]}");
 
             var leagues = doc.DocumentNode.SelectNodes(".//div[@class='pais']");
 
@@ -64,23 +64,13 @@ public class BetsBola : BetApi {
                             }),
                             leagueName,
                             eventEl.SelectSingleNode(".//div[@class='dateAndHour']").let(it => {
-                                var date = it.SelectSingleNode("//span[@class='date']").InnerText;
-                                MonthToNumber.TryParse(date.Split("/")[1], true, out MonthToNumber monthNumber);
+                                var date = it.SelectSingleNode(".//span[@class='date']").InnerText;
+                                var hour = it.SelectSingleNode(".//span[@class='hour']").InnerText;
 
-                                // Irá transformar o nome do mês para o seu numero, o nome do mês esta em português
-                                date = $"{date.Split("/")[0]}/{(byte)monthNumber}";
-
-                                var hour = it.SelectSingleNode("//span[@class='hour']").InnerText;
-
-                                return DateTime.ParseExact($"{date} {hour}", "dd/MM HH:mm",
-                                    brazilCulture, DateTimeStyles.None).let(time =>
-                                    new DateTimeOffset(time,
-                                        TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time").GetUtcOffset(time))
-                                );
+                                return ParseBetsBolaDateToDateTimeOffset(date, hour);
                             }),
                             teamNames[0],
                             teamNames[1],
-                            
                             new(
                                 oddsValues[0],
                                 oddsValues[2],
@@ -104,12 +94,41 @@ public class BetsBola : BetApi {
 
         Console.Out.WriteLine($"Pegando mercado para {events.Count} eventos");
 
+        var nEvents = new List<SportEvent>();
+
         Parallel.ForEach(events, item => {
             Thread.Sleep(400);
-            FillMercadoDeGol(item);
+
+            try {
+                FillMercadoDeGol(item);
+                nEvents.Add(item);
+            }
+            catch (NullReferenceException e) {
+                Console.Out.WriteLine($"Falha ao processar: {item.teamHomeName} x {item.teamAwayName}");
+                Console.Out.WriteLine($"Url: {item.url}");
+            }
         });
 
-        return events;
+        return nEvents;
+    }
+
+    public static DateTimeOffset ParseBetsBolaDateToDateTimeOffset(string date, string hour) {
+        var monthNumber = MonthToNumber.TryParse(date.Split("/")[1]);
+
+        // Irá transformar o nome do mês para o seu numero, o nome do mês esta em português
+        date = $"{date.Split("/")[0]}/{monthNumber}";
+
+        var parsedDate = DateTime.ParseExact($"{date} {hour}", "dd/MM HH:mm",
+            brazilCulture, DateTimeStyles.None).let(time =>
+            new DateTimeOffset(time,
+                TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time").GetUtcOffset(time))
+        );
+
+        if (DateTimeOffset.Now.Month == 12 && parsedDate.Month < 12) {
+            parsedDate = parsedDate.AddYears(1);
+        }
+
+        return parsedDate;
     }
 
     private List<string> ListCampeonatos() {
@@ -158,17 +177,23 @@ public class BetsBola : BetApi {
 }
 
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
-enum MonthToNumber : byte {
-    JAN = 1,
-    FEV = 2,
-    MAR = 3,
-    ABR = 4,
-    MAI = 5,
-    JUN = 6,
-    JUL = 7,
-    AGO = 8,
-    SET = 9,
-    OUT = 10,
-    NOV = 11,
-    DEZ = 12
+class MonthToNumber {
+    public static Dictionary<string, string> AllMonths = new() {
+        { "jan", "01" },
+        { "fev", "02" },
+        { "mar", "03" },
+        { "abr", "04" },
+        { "mai", "05" },
+        { "jun", "06" },
+        { "jul", "07" },
+        { "ago", "08" },
+        { "set", "09" },
+        { "out", "10" },
+        { "nov", "11" },
+        { "dez", "12" },
+    };
+
+    public static string? TryParse(string mounth) {
+        return AllMonths.ContainsKey(mounth.ToLower()) ? AllMonths[mounth] : null;
+    }
 }
