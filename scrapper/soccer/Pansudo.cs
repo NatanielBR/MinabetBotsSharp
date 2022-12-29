@@ -11,7 +11,7 @@ namespace MinabetBotsWeb.scrapper.soccer
         private CultureInfo brazilCulture = new("pt-BR");
         private string urlBase = "https://pansudopokervip.com/";
 
-        public Pansudo(HttpClient client) : base("Pansudo", "https://pansudopokervip.com", client) {
+        public Pansudo() : base("Pansudo", "https://pansudopokervip.com") {
             client.BaseAddress = new(urlBase);
         }
         public override List<SportEvent> ListEvents()

@@ -11,8 +11,8 @@ public class BetsBola : BetApi {
     private static CultureInfo brazilCulture = new("pt-BR");
     private string urlBase = "https://betsbola.com/sistema_v2/usuarios/simulador/desktop/";
 
-    public BetsBola(HttpClient client)
-        : base("BetsBola", "https://betsbola.com", client) {
+    public BetsBola()
+        : base("BetsBola", "https://betsbola.com")  {
     }
 
     public override List<SportEvent> ListEvents() {

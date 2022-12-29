@@ -46,7 +46,7 @@ namespace MinabetBotsWeb.scrapper.models
         [JsonPropertyName("startTime")]
         public long StartTime { get; set; }
 
-        public DateTime GetDateTime() => DateTimeOffset.FromUnixTimeMilliseconds(StartTime).DateTime;
+        public DateTimeOffset GetDateTime() => DateTimeOffset.FromUnixTimeMilliseconds(StartTime);
     }
 
     public class Market

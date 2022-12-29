@@ -10,7 +10,7 @@ namespace MinabetBotsWeb.scrapper.soccer {
         private CultureInfo brazilCulture = new("pt-BR");
         private string urlBase = "https://br.betano.com/";
 
-        public Betano(HttpClient client) : base("Betano", "https://br.betano.com", client) {
+        public Betano() : base("Betano", "https://br.betano.com") {
         }
 
         public override List<SportEvent> ListEvents() {
