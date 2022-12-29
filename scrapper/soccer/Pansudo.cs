@@ -11,7 +11,7 @@ namespace MinabetBotsWeb.scrapper.soccer
         private CultureInfo brazilCulture = new("pt-BR");
         private string urlBase = "https://pansudopokervip.com/";
 
-        public Pansudo(HttpClient client) : base("Betano", "https://pansudopokervip.com", client) {
+        public Pansudo(HttpClient client) : base("Pansudo", "https://pansudopokervip.com", client) {
             client.BaseAddress = new(urlBase);
         }
         public override List<SportEvent> ListEvents()
@@ -25,7 +25,9 @@ namespace MinabetBotsWeb.scrapper.soccer
                 var oddsMore2and5 = odds.Find(x => x.Descricao == "Jogo - Acima 2.5");
                 var oddsLess2and5 = odds.Find(x => x.Descricao == "Jogo - Abaixo 2.5");
                 if (oddsLess2and5 == null || oddsLess2and5 == null) return;
-                eventsSportsData.Add(new(gameChampData.EventId, gameChampData.CampJogoId, gameChampData.CampId, gameChampData.CampName, gameChampData.DataInicio, gameChampData.TimeCasa, gameChampData.TimeVisitante, new(gameChampData.PansudoEventOdds[0].Taxa, gameChampData.PansudoEventOdds[2].Taxa, gameChampData.PansudoEventOdds[1].Taxa, oddsMore2and5.Taxa, oddsLess2and5.Taxa), "Pansuro", urlHome));
+                eventsSportsData.Add(new(gameChampData.EventId, gameChampData.CampJogoId, gameChampData.CampId, gameChampData.CampName, 
+                    new DateTimeOffset(gameChampData.DataInicio, TimeSpan.FromHours(-3)).ToOffset(TimeSpan.Zero),
+                    gameChampData.TimeCasa, gameChampData.TimeVisitante, new(gameChampData.PansudoEventOdds[0].Taxa, gameChampData.PansudoEventOdds[2].Taxa, gameChampData.PansudoEventOdds[1].Taxa, oddsMore2and5.Taxa, oddsLess2and5.Taxa), "Pansuro", urlHome));
             });
 
             return eventsSportsData;
