@@ -1,4 +1,5 @@
 using MinabetBotsWeb.scrapper;
+using Newtonsoft.Json;
 
 namespace MinabetBotsWeb;
 
@@ -223,12 +224,18 @@ class CombinationItem {
 }
 
 public class Event3Combination {
+    [JsonProperty(propertyName:"event")]
     public SportEventJson EventJson { get; }
+    [JsonProperty(propertyName:"combinations")]
     public List<CombinationOdds> Combinations { get; }
+    [JsonProperty(propertyName:"surebet")]
     public double Surebet { get; }
+    [JsonProperty(propertyName:"eventCode")]
     public string EventCode { get; }
+    [JsonProperty(propertyName:"event_type")]
     public string EventType { get; }
 
+    [JsonIgnore]
     public DateTimeOffset Created = DateTimeOffset.Now;
 
     public Event3Combination(SportEventJson eventJson, List<CombinationOdds> combinations, double surebet, string eventCode, string eventType) {
@@ -241,8 +248,11 @@ public class Event3Combination {
 }
 
 public class CombinationOdds {
+    [JsonProperty(propertyName:"label")]
     public string Label { get; }
+    [JsonProperty(propertyName:"odds")]
     public double Odds { get; }
+    [JsonProperty(propertyName:"event")]
     public SportEventJson EventJson { get; }
 
     public CombinationOdds(string label, double odds, SportEventJson eventJson) {
@@ -253,15 +263,25 @@ public class CombinationOdds {
 }
 
 public class SportEventJson {
+    [JsonProperty(propertyName:"eventId")]
     private string EventId { get; }
+    [JsonProperty(propertyName:"champEventId")]
     private string ChampEventId { get; }
+    [JsonProperty(propertyName:"championshipId")]
     private string ChampionshipId { get; }
+    [JsonProperty(propertyName:"championshipName")]
     private string ChampionshipName { get; }
+    [JsonProperty(propertyName:"dateStarted")]
     private string DateStared { get; } // iso
+    [JsonProperty(propertyName:"teamHomeName")]
     public string TeamHomeName { get; }
+    [JsonProperty(propertyName:"teamAwayName")]
     public string TeamAwayName { get; }
+    [JsonProperty(propertyName:"odds")]
     private EventOdds Odds { get; }
+    [JsonProperty(propertyName:"sourceName")]
     private string SourceName { get; }
+    [JsonProperty(propertyName:"url")]
     private string Url { get; }
 
     public SportEventJson(string eventId, string champEventId, string championshipId, string championshipName, string dateStared, string teamHomeName, string teamAwayName, EventOdds odds, string sourceName, string url) {

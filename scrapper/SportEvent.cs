@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace MinabetBotsWeb.scrapper;
 
 public class SportEvent {
@@ -47,10 +49,15 @@ public class SportEvent {
 }
 
 public class EventOdds {
+    [JsonProperty(propertyName:"home_win_odds")]
     public readonly double home_win_odds;
+    [JsonProperty(propertyName:"away_win_odds")]
     public readonly double away_win_odds;
+    [JsonProperty(propertyName:"draw_odds")]
     public readonly double draw_odds;
+    [JsonProperty(propertyName:"more2and5odds")]
     public double more2and5odds;
+    [JsonProperty(propertyName:"less2and5odds")]
     public double less2and5odds;
 
     public EventOdds(double homeWinOdds, double awayWinOdds, double drawOdds, double more2And5Odds, double less2And5Odds) {
