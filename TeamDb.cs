@@ -1,17 +1,15 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using F23.StringSimilarity;
-using F23.StringSimilarity.Interfaces;
 using MinabetBotsWeb.scrapper;
 
 namespace MinabetBotsWeb;
 
 public class TeamDb {
-    private double minRatio;
     private int changeFire;
 
-    public event EventHandler<string>? OnChange;
-
     public ConcurrentDictionary<string, List<SportEvent>> eventMap = new();
+    private double minRatio;
     private JaroWinkler similarity = new();
 
     public TeamDb(double minRatio = 0.3, int changeFire = 2) {
@@ -19,7 +17,21 @@ public class TeamDb {
         this.changeFire = changeFire;
     }
 
+    public List<SportEvent> this[string key] {
+        get {
+            return eventMap[key];
+        }
+
+        set {
+            eventMap[key] = value;
+        }
+    }
+
+    public event EventHandler<List<string>>? OnChangeList;
+
+    [SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
     public void PutAll(List<SportEvent> events) {
+        var changeList = new List<string>();
         events.ForEach(item => {
             var found = findKey(item);
 
@@ -40,19 +52,13 @@ public class TeamDb {
                 events.Add(item);
 
                 if (events.Count >= changeFire) {
-                    OnChange?.Invoke(null, found.Value.Key);
+                    changeList.Add(found.Value.Key);
                 }
             }
         });
-    }
 
-    public List<SportEvent> this[string key] {
-        get {
-            return eventMap[key];
-        }
-
-        set {
-            eventMap[key] = value;
+        if (changeList.Count > 0) {
+            OnChangeList?.Invoke(this, changeList);
         }
     }
 
@@ -70,7 +76,7 @@ public class TeamDb {
             .Select(item => KeyValuePair.Create(item, item.Split(" - ", 2)[1].Split(" x ")))
             .Select(item => KeyValuePair.Create(
                 item.Key,
-                ( similarity.Distance(sportEvent.teamHomeName, item.Value[0]) + similarity.Distance(sportEvent.teamAwayName, item.Value[1]) ) / 2
+                (similarity.Distance(sportEvent.teamHomeName, item.Value[0]) + similarity.Distance(sportEvent.teamAwayName, item.Value[1])) / 2
             ))
             .Where(item => item.Value <= minRatio)
             .MinBySafe(item => item.Value);

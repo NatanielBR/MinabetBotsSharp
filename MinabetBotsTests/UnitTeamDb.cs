@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Runtime.InteropServices.ComTypes;
 using F23.StringSimilarity;
 using MinabetBotsWeb;
 using MinabetBotsWeb.scrapper;
@@ -77,9 +76,9 @@ public class UnitTeamDb {
         var fired = false;
         var teamDb = new TeamDb(changeFire:3);
 
-        teamDb.OnChange += (_, item) => {
+        teamDb.OnChangeList += (_, item) => {
             fired = true;
-            Assert.True(item.Length >= 3);
+            Assert.That(item[0].Length, Is.GreaterThanOrEqualTo(3));
         };
 
         var list = new List<SportEvent>();
@@ -120,12 +119,12 @@ public class UnitTeamDb {
 
         combinator.OnNewSurebet += (_, combination) => {
             Assert.Multiple(() => {
-                Assert.That(Math.Abs(combination.Combinations.First(it => it.Label == "draw").Odds - 2.0) == 0, Is.True);
-                Assert.That(Math.Abs(combination.Combinations.First(it => it.Label == "home").Odds - 5.0) == 0, Is.True);
-                Assert.That(Math.Abs(combination.Combinations.First(it => it.Label == "away").Odds - 4.5) == 0, Is.True);
+                Assert.That(Math.Abs(combination[0].Combinations.First(it => it.Label == "draw").Odds - 2.0) == 0, Is.True);
+                Assert.That(Math.Abs(combination[0].Combinations.First(it => it.Label == "home").Odds - 5.0) == 0, Is.True);
+                Assert.That(Math.Abs(combination[0].Combinations.First(it => it.Label == "away").Odds - 4.5) == 0, Is.True);
             });
 
-            combination.Combinations.ForEach(item => {
+            combination[0].Combinations.ForEach(item => {
                 Console.Out.WriteLine($"Label: {item.Label}");
                 Console.Out.WriteLine($"Label: {item.Odds}");
             });
