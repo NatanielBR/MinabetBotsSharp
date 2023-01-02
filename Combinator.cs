@@ -7,9 +7,9 @@ public class Combinator {
     private string eventType;
     private TeamDb _teamDb;
 
-    public event EventHandler<Event3Combination> OnNewSurebet;
+    public event EventHandler<EventCombination> OnNewSurebet;
 
-    private Dictionary<string, Event3Combination> map = new();
+    private Dictionary<string, EventCombination> map = new();
     public Combinator(string eventType, TeamDb teamDb) {
         this.eventType = eventType;
         teamDb.OnChange += OnChange;
@@ -109,7 +109,82 @@ public class Combinator {
         return result;
     }
 
-    private Event3Combination FindBestCombination(IEnumerable<SportEvent> sportEvents, SportEvent sportEvent, string key) {
+    private IEnumerable<TwoValues<CombinationItem>> Combine2Options(IReadOnlyList<CombinationItem> combinationItems) {
+        List<TwoValues<CombinationItem>> result = new();
+
+        if (combinationItems.Count <= 3) {
+            return result;
+        }
+        var combinationItemsMirror = new List<CombinationItem>(combinationItems);
+
+        for (var i = combinationItems.Count - 1; i >= 0; i--) {
+            combinationItemsMirror.rotateFirst();
+
+            var nList = new List<CombinationItem>(combinationItemsMirror);
+
+            while (nList.Count >= 3) {
+                var twoValuesNullable = new TwoValuesNullable<CombinationItem>(null, null);
+
+                do {
+                    var opts = "";
+
+                    {
+                        var _opts = new List<string> {
+                            $"{twoValuesNullable.One?.SourceName}_{twoValuesNullable.One?.Label}",
+                            $"{twoValuesNullable.Two?.SourceName}_{twoValuesNullable.Two?.Label}"
+                        };
+
+                        opts = String.Join(" ", _opts);
+                    }
+
+                    var found = nList.FirstOrDefault(item =>
+                        !(opts.Contains(item.SourceName) || opts.Contains(item.Label)));
+
+                    if (found == null) {
+                        break;
+                    }
+
+                    nList.Remove(found);
+
+                    twoValuesNullable.Add(found);
+                } while (twoValuesNullable.HasSpace());
+
+                if (!twoValuesNullable.HasSpace()) {
+                    result.Add(twoValuesNullable.Build());
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public static double CalculateSurebet(ThreeValues<CombinationItem> options) {
+        return /* p */100 * (
+            /* o */ (1 / (
+                /* r */ (1 / options.One.Odd + 1 / options.Two.Odd + 1 / options.Three.Odd)
+                /*o */ * options.One.Odd))
+            /* p */ * options.One.Odd - 1);
+    }
+
+    public static double CalculateSurebet(TwoValues<CombinationItem> options) {
+        return // e = odd1
+            // t = odd2
+            // formula = ( 100 * ( ( 1 / ( ( 1 / (parseFloat(e)) + 1 / (parseFloat(t)) ) * parseFloat(e) ) ) * parseFloat(e) - 1) )
+            (
+                // percentage
+                (100 * (
+                    // r
+                    (1 / (
+                        // a
+                        (1 / (options.One.Odd) + 1 / (options.Two.Odd))
+                        // r
+                        * options.One.Odd))
+                    // percentage
+                    * options.One.Odd - 1))
+            );
+    }
+
+    private EventCombination FindBestCombination(IEnumerable<SportEvent> sportEvents, SportEvent sportEvent, string key) {
         var nList = new List<SportEvent>();
         nList.AddRange(sportEvents);
 
@@ -124,25 +199,17 @@ public class Combinator {
             }).ToList()
         );
 
-        var bestCombination = allCombination.MaxBy(it =>
-            /* p */100 * (
-                /* o */ (1 / (
-                    /* r */ (1 / it.One.Odd + 1 / it.Two.Odd + 1 / it.Three.Odd)
-                    /*o */ * it.One.Odd))
-                /* p */ * it.One.Odd - 1));
+        var bestCombination = allCombination.MaxBy(CalculateSurebet);
 
-        var converted = new List<CombinationItem>();
-        converted.Add(bestCombination.One);
-        converted.Add(bestCombination.Two);
-        converted.Add(bestCombination.Three);
+        var converted = new List<CombinationItem> {
+            bestCombination.One,
+            bestCombination.Two,
+            bestCombination.Three,
+        };
 
-        var surebet = /* p */ ((
-            /* o */ (1 / (
-                /* r */ (1 / bestCombination.One.Odd + 1 / bestCombination.Two.Odd + 1 / bestCombination.Three.Odd)
-                /* o */ * bestCombination.One.Odd))
-            /* p */ * bestCombination.One.Odd - 1));
+        var surebet = CalculateSurebet(bestCombination);
 
-        return new Event3Combination(
+        return new EventCombination(
             sportEvent.ToEventJson(),
             converted.Select(it => new CombinationOdds(
                 it.Label,
@@ -155,9 +222,44 @@ public class Combinator {
         );
     }
 
+    private EventCombination FindBestCombination2Options(IEnumerable<SportEvent> sportEvents, SportEvent sportEvent, string key) {
+        var nList = new List<SportEvent>();
+        nList.AddRange(sportEvents);
+
+        var allCombination = Combine2Options(sportEvents.SelectMany(it => {
+                var list = new List<KeyValuePair<double, string>>();
+
+                list.Add(KeyValuePair.Create(it.odds.more2and5odds, "more25"));
+                list.Add(KeyValuePair.Create(it.odds.less2and5odds, "less25"));
+
+                return list.Select(it2 => new CombinationItem(it2.Key, it2.Value, it.sourceName));
+            }).ToList()
+        );
+
+        var bestCombination = allCombination.MaxBy(CalculateSurebet);
+
+        var converted = new List<CombinationItem> {
+            bestCombination.One,
+            bestCombination.Two,
+        };
+
+        var surebet = CalculateSurebet(bestCombination);
+
+        return new EventCombination(
+            sportEvent.ToEventJson(),
+            converted.Select(it => new CombinationOdds(
+                it.Label,
+                it.Odd,
+                nList.First(it2 => it2.sourceName == it.SourceName).ToEventJson()
+            )).ToList(),
+            surebet,
+            key,
+            eventType
+        );
+    }
 }
 
-class ThreeValues<T> {
+public class ThreeValues<T> {
     public T One { get; set; }
     public T Two { get; set; }
     public T Three { get; set; }
@@ -166,6 +268,16 @@ class ThreeValues<T> {
         One = one;
         Two = two;
         Three = three;
+    }
+}
+
+public class TwoValues<T> {
+    public T One { get; set; }
+    public T Two { get; set; }
+
+    public TwoValues(T one, T two) {
+        One = one;
+        Two = two;
     }
 }
 
@@ -199,7 +311,33 @@ class ThreeValuesNullable<T> {
     }
 }
 
-class CombinationItem {
+class TwoValuesNullable<T> {
+    public T? One { get; set; }
+    public T? Two { get; set; }
+
+    public TwoValuesNullable(T? one, T? two) {
+        One = one;
+        Two = two;
+    }
+
+    public bool HasSpace() {
+        return One == null || Two == null;
+    }
+
+    public void Add(T value) {
+        if (One == null) {
+            One = value;
+        } else if (Two == null) {
+            Two = value;
+        }
+    }
+
+    public TwoValues<T> Build() {
+        return new(One!, Two!);
+    }
+}
+
+public class CombinationItem {
     public double Odd { get; }
     public string Label { get; }
     public string SourceName { get; }
@@ -223,7 +361,7 @@ class CombinationItem {
     }
 }
 
-public class Event3Combination {
+public class EventCombination {
     [JsonProperty(propertyName:"event")]
     public SportEventJson EventJson { get; }
     [JsonProperty(propertyName:"combinations")]
@@ -238,7 +376,7 @@ public class Event3Combination {
     [JsonIgnore]
     public DateTimeOffset Created = DateTimeOffset.Now;
 
-    public Event3Combination(SportEventJson eventJson, List<CombinationOdds> combinations, double surebet, string eventCode, string eventType) {
+    public EventCombination(SportEventJson eventJson, List<CombinationOdds> combinations, double surebet, string eventCode, string eventType) {
         this.EventJson = eventJson;
         Combinations = combinations;
         Surebet = surebet;
