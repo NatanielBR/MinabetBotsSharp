@@ -24,7 +24,7 @@ public class Program
         
         if (File.Exists(configPath)) {
             Console.Out.WriteLine("Arquivo de configuração existe. Carregando...");
-            var text = File.ReadAllText("minabetbot_config.json");
+            var text = File.ReadAllText(configPath);
             programConfig = JsonConvert.DeserializeObject<ProgramConfig>(text);
         } else {
             Console.Out.WriteLine("Arquivo de configuração não existe. Usando configurações padrões...");
@@ -34,6 +34,7 @@ public class Program
         var combinator = new Combinator(programConfig.EventType, teamDb);
         Console.Out.WriteLine("Carregado configuração:");
         Console.Out.WriteLine(programConfig.ToString());
+        File.WriteAllText(configPath, JsonConvert.SerializeObject(programConfig));
 
         combinator.OnNewSurebet += async (_, combination) => {
             var jsonData = new StringContent(JsonConvert.SerializeObject(combination),
@@ -45,14 +46,6 @@ public class Program
             await HttpClient.PostAsync($"{programConfig.DjangoUrl}/bot/events",
                 jsonData
             );
-            // Console.Out.WriteLine($"Team Home: {combination.EventJson.TeamHomeName}");
-            // Console.Out.WriteLine($"Team Away: {combination.EventJson.TeamAwayName}");
-            // Console.Out.WriteLine($"Surebet: {combination.Surebet}");
-            //
-            // combination.Combinations.ForEach(item => {
-            //     Console.Out.WriteLine($"\tLabel: {item.Label}");
-            //     Console.Out.WriteLine($"\tOdd: {item.Odds}");
-            // });
         };
 
         var betApis = new List<BetApi> {
@@ -79,7 +72,7 @@ public class Program
                 }
 
                 Console.Out.WriteLine($"Processado {betApi.WebSiteName}");
-                Thread.Sleep(4000);
+                Thread.Sleep(programConfig.ThreadSleepMs);
             });
 
         }
@@ -89,10 +82,12 @@ public class Program
 public class ProgramConfig {
     public string DjangoUrl { get; set; }
     public string EventType { get; set; }
+    public int ThreadSleepMs { get; set; }
 
     public ProgramConfig() {
         DjangoUrl = "http://localhost:8000";
         EventType = "soccer";
+        ThreadSleepMs = 4000;
     }
     
     public ProgramConfig(string djangoUrl, string eventType) {
@@ -101,6 +96,6 @@ public class ProgramConfig {
     }
 
     public override string ToString() {
-        return $"{nameof(DjangoUrl)}: {DjangoUrl}, {nameof(EventType)}: {EventType}";
+        return $"{nameof(DjangoUrl)}: {DjangoUrl}, {nameof(EventType)}: {EventType}, {nameof(ThreadSleepMs)}: {ThreadSleepMs}";
     }
 }
