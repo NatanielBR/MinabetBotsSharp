@@ -17,13 +17,20 @@ public class Program
         // See https://aka.ms/new-console-template for more information
 
         var teamDb = new TeamDb(minRatio: 0.18, changeFire: 3);
-        var text = "";
+        ProgramConfig programConfig;
 
-        if (File.Exists("minabetbot_config.json")) {
-            text = File.ReadAllText("minabetbot_config.json");
+        var configPath = args[0];
+        Console.Out.WriteLine($"Checando se existe a config: '{configPath}'");
+        
+        if (File.Exists(configPath)) {
+            Console.Out.WriteLine("Arquivo de configuração existe. Carregando...");
+            var text = File.ReadAllText("minabetbot_config.json");
+            programConfig = JsonConvert.DeserializeObject<ProgramConfig>(text);
+        } else {
+            Console.Out.WriteLine("Arquivo de configuração não existe. Usando configurações padrões...");
+            programConfig = new();   
         }
-
-        var programConfig = JsonConvert.DeserializeObject<ProgramConfig>(text) ?? new ProgramConfig();
+        
         var combinator = new Combinator(programConfig.EventType, teamDb);
         Console.Out.WriteLine("Carregado configuração:");
         Console.Out.WriteLine(programConfig.ToString());
@@ -86,6 +93,11 @@ public class ProgramConfig {
     public ProgramConfig() {
         DjangoUrl = "http://localhost:8000";
         EventType = "soccer";
+    }
+    
+    public ProgramConfig(string djangoUrl, string eventType) {
+        DjangoUrl = djangoUrl;
+        EventType = eventType;
     }
 
     public override string ToString() {

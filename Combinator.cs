@@ -35,7 +35,7 @@ public class Combinator {
             OnNewSurebet.Invoke(this, combination);
         } else if (Math.Abs(lastCombination.Surebet - combination.Surebet) > 0.1 ||
                    // 2 minutos = 60 * 2
-                   (lastCombination.Created.ToUnixTimeSeconds() - combination.Created.ToUnixTimeSeconds()) > 120) {
+                   Math.Abs(lastCombination.Created.ToUnixTimeSeconds() - combination.Created.ToUnixTimeSeconds()) > 120) {
             map[sportEventName] = combination;
 
             var code = '=';
