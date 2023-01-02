@@ -75,7 +75,7 @@ public class UnitTeamDb {
     [Test]
     public void TestTeamDB() {
         var fired = false;
-        var teamDb = new TeamDb(changeFire: 3);
+        var teamDb = new TeamDb(changeFire:3);
 
         teamDb.OnChange += (_, item) => {
             fired = true;
@@ -115,7 +115,7 @@ public class UnitTeamDb {
 
     [Test]
     public void TestCombinator() {
-        var teamDb = new TeamDb(changeFire: 3);
+        var teamDb = new TeamDb(changeFire:3);
         var combinator = new Combinator("soccer", teamDb);
 
         combinator.OnNewSurebet += (_, combination) => {
@@ -135,19 +135,19 @@ public class UnitTeamDb {
 
         var list = new List<SportEvent> {
             CreateTestEvent(date, "Al Kuwait SC Sub-21", "Al Salmiyah SC Sub-21", "Casa A",
-                homeWinOdds: 4.0,
-                drawOdds: 1.0,
-                awayWinOdds: 4.5
+                homeWinOdds:4.0,
+                drawOdds:1.0,
+                awayWinOdds:4.5
             ),
             CreateTestEvent(date, "Al-Kuwait Sub-21", "Al Salmiya Sub-21", "Casa B",
-                homeWinOdds: 3.0,
-                drawOdds: 2.0,
-                awayWinOdds: 4.0
+                homeWinOdds:3.0,
+                drawOdds:2.0,
+                awayWinOdds:4.0
             ),
             CreateTestEvent(date, "Al-Kuwait Sub-21", "Al Salmiya Sub-21", "Casa C",
-                homeWinOdds: 5.0,
-                drawOdds: 1.0,
-                awayWinOdds: 5.0
+                homeWinOdds:5.0,
+                drawOdds:1.0,
+                awayWinOdds:5.0
             ),
         };
 
@@ -157,21 +157,49 @@ public class UnitTeamDb {
     }
 
     [Test]
+    public void TestFormula3Options() {
+        var odd1 = 3.0;
+        var odd2 = 3.5;
+        var odd3 = 4.0;
+
+        Assert.That(Math.Round(Combinator.CalculateSurebet(
+            new ThreeValues<CombinationItem>(
+                new(odd1, "1", ""),
+                new(odd2, "x", ""),
+                new(odd3, "2", "")
+            )
+        ), 2), Is.EqualTo(15.07));
+    }
+
+    [Test]
+    public void TestFormula2Options() {
+        var odd1 = 2.0;
+        var odd2 = 2.1;
+
+        Assert.That(Math.Round(Combinator.CalculateSurebet(
+            new TwoValues<CombinationItem>(
+                new(odd1, "1", ""),
+                new(odd2, "2", "")
+            )
+        ), 2), Is.EqualTo(2.44));
+    }
+
+    [Test]
     public void TestMatchs() {
         var web = new HttpClient();
-        var teamDb = new TeamDb(minRatio: 0.18);
-    
+        var teamDb = new TeamDb(minRatio:0.18);
+
         var betApis = new List<BetApi> {
             new BetsBola(),
             new Betano(),
             new Pansudo(),
         };
-        
+
         betApis.ForEach(item => {
             var filePath = $"{Path.GetTempPath()}{item.WebSiteName}_events_test.json";
-        
+
             var events = JsonConvert.DeserializeObject<List<SportEvent>>(File.ReadAllText(filePath));
-        
+
             teamDb.PutAll(events);
         });
     }
