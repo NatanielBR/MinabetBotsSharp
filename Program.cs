@@ -8,30 +8,32 @@ namespace MinabetBotsWeb;
 
 public class Program {
     private static HttpClient HttpClient = new();
+    public static string eventEndpoint;
+    public static ProgramConfig ProgramConfig;
 
     [SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH", MessageId = "type: HtmlAgilityPack.HtmlNode")]
     public static void Main(string[] args) {
         // See https://aka.ms/new-console-template for more information
 
         var teamDb = new TeamDb(minRatio:0.18, changeFire:3);
-        ProgramConfig programConfig;
-
         var configPath = args[0];
         Console.Out.WriteLine($"Checando se existe a config: '{configPath}'");
 
         if (File.Exists(configPath)) {
             Console.Out.WriteLine("Arquivo de configuração existe. Carregando...");
             var text = File.ReadAllText(configPath);
-            programConfig = JsonConvert.DeserializeObject<ProgramConfig>(text);
+            ProgramConfig = JsonConvert.DeserializeObject<ProgramConfig>(text)!;
         } else {
             Console.Out.WriteLine("Arquivo de configuração não existe. Usando configurações padrões...");
-            programConfig = new();
+            ProgramConfig = new();
         }
 
-        var combinator = new Combinator(programConfig.EventType, teamDb);
+        eventEndpoint = ProgramConfig.SendEventsToList ? "eventsList" : "events";
+
+        var combinator = new Combinator(ProgramConfig.EventType, teamDb);
         Console.Out.WriteLine("Carregado configuração:");
-        Console.Out.WriteLine(programConfig.ToString());
-        File.WriteAllText(configPath, JsonConvert.SerializeObject(programConfig));
+        Console.Out.WriteLine(ProgramConfig.ToString());
+        File.WriteAllText(configPath, JsonConvert.SerializeObject(ProgramConfig));
 
         combinator.OnNewSurebet += async (_, combination) => {
             var jsonData = new StringContent(JsonConvert.SerializeObject(combination),
@@ -40,7 +42,7 @@ public class Program {
             jsonData.Headers.Add("bot-id", "aYvagG1zygWWKz0duUSj");
 
             // var result = 
-            await HttpClient.PostAsync($"{programConfig.DjangoUrl}/bot/eventsList",
+            await HttpClient.PostAsync($"{ProgramConfig.DjangoUrl}/bot/{eventEndpoint}",
                 jsonData
             );
         };
@@ -70,7 +72,7 @@ public class Program {
                 }
 
                 Console.Out.WriteLine($"Processado {betApi.WebSiteName}");
-                Thread.Sleep(programConfig.ThreadSleepMs);
+                Thread.Sleep(ProgramConfig.ThreadSleepMs);
             });
 
         }
@@ -83,15 +85,18 @@ public class ProgramConfig {
         DjangoUrl = "http://localhost:8000";
         EventType = "soccer";
         ThreadSleepMs = 4000;
+        SendEventsToList = true;
     }
 
-    public ProgramConfig(string djangoUrl, string eventType) {
+    public ProgramConfig(string djangoUrl, string eventType, bool sendEventsToList) {
         DjangoUrl = djangoUrl;
         EventType = eventType;
+        SendEventsToList = sendEventsToList;
     }
     public string DjangoUrl { get; set; }
     public string EventType { get; set; }
     public int ThreadSleepMs { get; set; }
+    public bool SendEventsToList { get; set; }
 
     public override string ToString() {
         return $"{nameof(DjangoUrl)}: {DjangoUrl}, {nameof(EventType)}: {EventType}, {nameof(ThreadSleepMs)}: {ThreadSleepMs}";
