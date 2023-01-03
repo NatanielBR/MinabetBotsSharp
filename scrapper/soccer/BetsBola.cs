@@ -6,15 +6,18 @@ using HtmlAgilityPack;
 
 namespace MinabetBotsWeb.scrapper.soccer;
 
-public class BetsBola : BetApi {
-    private HtmlWeb web = new();
+public class BetsBola : BetApi
+{
     private static CultureInfo brazilCulture = new("pt-BR");
     private string urlBase = "https://betsbola.com/sistema_v2/usuarios/simulador/desktop/";
+    private HtmlWeb web = new();
 
     public BetsBola()
-        : base("BetsBola", "https://betsbola.com")  {
+        : base("BetsBola", "https://betsbola.com") {
     }
 
+    [SuppressMessage("ReSharper.DPA", "DPA0000: DPA issues")]
+    [SuppressMessage("ReSharper.DPA", "DPA0001: Memory allocation issues")]
     public override List<SportEvent> ListEvents() {
         var urls = ListCampeonatos();
         var events = new List<SportEvent>();
@@ -177,7 +180,8 @@ public class BetsBola : BetApi {
 }
 
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
-class MonthToNumber {
+class MonthToNumber
+{
     public static Dictionary<string, string> AllMonths = new() {
         { "jan", "01" },
         { "fev", "02" },

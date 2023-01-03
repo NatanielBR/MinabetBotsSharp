@@ -6,7 +6,8 @@ using Newtonsoft.Json;
 
 namespace MinabetBotsWeb;
 
-public class Program {
+public class Program
+{
     private static HttpClient HttpClient = new();
     public static string eventEndpoint;
     public static ProgramConfig ProgramConfig;
@@ -28,6 +29,13 @@ public class Program {
             ProgramConfig = new();
         }
 
+        if (CheckURL(ProgramConfig.DjangoUrl)) {
+            Console.Out.WriteLine("Site Django confirmado");
+        } else {
+            Console.Out.WriteLine("Falha ao checar o site.");
+            Environment.Exit(-1);
+            return;
+        }
         eventEndpoint = ProgramConfig.SendEventsToList ? "eventsList" : "events";
 
         var combinator = new Combinator(ProgramConfig.EventType, teamDb);
@@ -36,15 +44,44 @@ public class Program {
         File.WriteAllText(configPath, JsonConvert.SerializeObject(ProgramConfig));
 
         combinator.OnNewSurebet += async (_, combination) => {
-            var jsonData = new StringContent(JsonConvert.SerializeObject(combination),
-                Encoding.UTF8,
-                "application/json");
-            jsonData.Headers.Add("bot-id", "aYvagG1zygWWKz0duUSj");
 
-            // var result = 
-            await HttpClient.PostAsync($"{ProgramConfig.DjangoUrl}/bot/{eventEndpoint}",
-                jsonData
-            );
+            if (ProgramConfig.SendEventsToList) {
+                try {
+                    var jsonData = new StringContent(JsonConvert.SerializeObject(combination),
+                        Encoding.UTF8,
+                        "application/json");
+                    jsonData.Headers.Add("bot-id", "aYvagG1zygWWKz0duUSj");
+
+                    await HttpClient.PostAsync($"{ProgramConfig.DjangoUrl}/bot/{eventEndpoint}",
+                        jsonData
+                    );
+                }
+                catch (Exception e) {
+                    Console.WriteLine("Falha ao enviar as combinações");
+                }
+            } else {
+                var failCount = 0;
+                var total = combination.Count;
+                combination.ForEach(async (item) => {
+                    try {
+                        var jsonData = new StringContent(JsonConvert.SerializeObject(item),
+                            Encoding.UTF8,
+                            "application/json");
+                        jsonData.Headers.Add("bot-id", "aYvagG1zygWWKz0duUSj");
+
+                        await HttpClient.PostAsync($"{ProgramConfig.DjangoUrl}/bot/{eventEndpoint}",
+                            jsonData
+                        );
+                    }
+                    catch (Exception err) {
+                        failCount++;
+                    }
+                });
+
+                if (failCount > 0) {
+                    await Console.Out.WriteLineAsync($"Falha ao enviar: {failCount}/{total}");
+                }
+            }
         };
 
         var betApis = new List<BetApi> {
@@ -77,9 +114,14 @@ public class Program {
 
         }
     }
+
+    public static bool CheckURL(string url) {
+        return (HttpClient.GetAsync(url).Result).IsSuccessStatusCode;
+    }
 }
 
-public class ProgramConfig {
+public class ProgramConfig
+{
 
     public ProgramConfig() {
         DjangoUrl = "http://localhost:8000";
