@@ -105,7 +105,7 @@ public class Program
                 catch (Exception err) {
                     Console.Out.WriteLine("Falha ao pegar os dados");
                     Console.Out.WriteLine($"Erro: {err.Message}");
-                    Console.Out.WriteLine($"StackTrace:\n{err.StackTrace}");
+                    Console.Out.WriteLine($"Exception:\n{err}");
                 }
 
                 Console.Out.WriteLine($"Processado {betApi.WebSiteName}");
