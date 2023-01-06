@@ -22,47 +22,99 @@ public class Combinator {
         sportEventNames.ForEach(sportEventName => {
             var value = _teamDb[sportEventName];
 
-            if (value == null || value.Count < 3) return;
-
-            var combination = FindBestCombination(value, value[0], sportEventName);
-            map.TryGetValue(sportEventName, out var lastCombination);
-
-            // C# Avisou que comparar float pode dar merda, então estou comparando e checando se a diferença é menor que 0.1
-            if (lastCombination == null) {
-                map[sportEventName] = combination;
-
-                var text = $"↑ {combination.Surebet} -> {combination.EventJson.TeamHomeName} - {combination.EventJson.TeamAwayName}";
-
-                Console.Out.WriteLine(text);
-
-                combinations.Add(combination);
-            } else if (Math.Abs(lastCombination.Surebet - combination.Surebet) > 0.1 ||
-                       // 2 minutos = 60 * 2
-                       Math.Abs(lastCombination.Created.ToUnixTimeSeconds() - combination.Created.ToUnixTimeSeconds()) > 120) {
-                map[sportEventName] = combination;
-
-                var code = '=';
-
-                if (combination.Surebet > lastCombination.Surebet) {
-                    code = '↑';
-                } else if (combination.Surebet < lastCombination.Surebet) {
-                    code = '↓';
-                }
-
-                var text = $"{code} {combination.Surebet} -> {combination.EventJson.TeamHomeName} - {combination.EventJson.TeamAwayName}";
-
-                Console.Out.WriteLine(text);
-
-                combinations.Add(combination);
-            } else if (
-                // 5 minutos = 60 * 5
-                (lastCombination.Created.ToUnixTimeSeconds() - combination.Created.ToUnixTimeSeconds()) > 300) {
-                map.Remove(sportEventName);
-            }
+            Process3Options(value, sportEventName, out var eventCombinations);
+            combinations.AddRange(eventCombinations);
+            Process2Options(value, sportEventName, out var eventCombinations2);
+            combinations.AddRange(eventCombinations2);
         });
 
         if (combinations.Count > 0) {
             OnNewSurebet.Invoke(this, combinations);
+        }
+    }
+
+    private void Process3Options(IReadOnlyList<SportEvent>? value, string sportEventName, out List<EventCombination> combinations) {
+        combinations = new();
+
+        if (value == null || value.Count < 3) {
+            return;
+        }
+
+        var combination = FindBestCombination(value, value[0], sportEventName);
+        map.TryGetValue(sportEventName, out var lastCombination);
+
+        if (lastCombination == null) {
+            map[sportEventName] = combination;
+
+            var text = $"↑ {combination.Surebet} -> {combination.EventJson.TeamHomeName} - {combination.EventJson.TeamAwayName}";
+
+            Console.Out.WriteLine(text);
+
+            combinations.Add(combination);
+        } else if (Math.Abs(lastCombination.Surebet - combination.Surebet) > 0.1 ||
+                   // 2 minutos = 60 * 2
+                   Math.Abs(lastCombination.Created.ToUnixTimeSeconds() - combination.Created.ToUnixTimeSeconds()) > 120) {
+            map[sportEventName] = combination;
+
+            var code = '=';
+
+            if (combination.Surebet > lastCombination.Surebet) {
+                code = '↑';
+            } else if (combination.Surebet < lastCombination.Surebet) {
+                code = '↓';
+            }
+
+            var text = $"{code} {combination.Surebet} -> {combination.EventJson.TeamHomeName} - {combination.EventJson.TeamAwayName}";
+
+            Console.Out.WriteLine(text);
+
+            combinations.Add(combination);
+        } else if (
+            // 5 minutos = 60 * 5
+            (lastCombination.Created.ToUnixTimeSeconds() - combination.Created.ToUnixTimeSeconds()) > 300) {
+            map.Remove(sportEventName);
+        }
+    }
+    private void Process2Options(IReadOnlyList<SportEvent>? value, string sportEventName, out List<EventCombination> combinations) {
+        combinations = new();
+
+        if (value == null || value.Count < 2) {
+            return;
+        }
+
+        var combination = FindBestCombination2Options(value, value[0], sportEventName);
+        map.TryGetValue(sportEventName, out var lastCombination);
+
+        if (lastCombination == null) {
+            map[sportEventName] = combination;
+
+            var text = $"↑ {combination.Surebet} -> {combination.EventJson.TeamHomeName} - {combination.EventJson.TeamAwayName}";
+
+            Console.Out.WriteLine(text);
+
+            combinations.Add(combination);
+        } else if (Math.Abs(lastCombination.Surebet - combination.Surebet) > 0.1 ||
+                   // 2 minutos = 60 * 2
+                   Math.Abs(lastCombination.Created.ToUnixTimeSeconds() - combination.Created.ToUnixTimeSeconds()) > 120) {
+            map[sportEventName] = combination;
+
+            var code = '=';
+
+            if (combination.Surebet > lastCombination.Surebet) {
+                code = '↑';
+            } else if (combination.Surebet < lastCombination.Surebet) {
+                code = '↓';
+            }
+
+            var text = $"{code} {combination.Surebet} -> {combination.EventJson.TeamHomeName} - {combination.EventJson.TeamAwayName}";
+
+            Console.Out.WriteLine(text);
+
+            combinations.Add(combination);
+        } else if (
+            // 5 minutos = 60 * 5
+            (lastCombination.Created.ToUnixTimeSeconds() - combination.Created.ToUnixTimeSeconds()) > 300) {
+            map.Remove(sportEventName);
         }
     }
 
@@ -84,7 +136,7 @@ public class Combinator {
                 var threeValues = new ThreeValuesNullable<CombinationItem>(null, null, null);
 
                 do {
-                    var opts = "";
+                    string opts;
 
                     {
                         var _opts = new List<string> {
@@ -222,7 +274,7 @@ public class Combinator {
                 nList.First(it2 => it2.sourceName == it.SourceName).ToEventJson())).ToList(),
             surebet,
             key,
-            eventType);
+            eventType, "1x2");
     }
 
     private EventCombination FindBestCombination2Options(IEnumerable<SportEvent> sportEvents, SportEvent sportEvent, string key) {
@@ -253,7 +305,7 @@ public class Combinator {
                 nList.First(it2 => it2.sourceName == it.SourceName).ToEventJson())).ToList(),
             surebet,
             key,
-            eventType);
+            eventType, "1-2");
     }
 }
 
@@ -400,12 +452,20 @@ public class EventCombination {
     [JsonIgnore]
     public DateTimeOffset Created = DateTimeOffset.Now;
 
-    public EventCombination(SportEventJson eventJson, List<CombinationOdds> combinations, double surebet, string eventCode, string eventType) {
+    public EventCombination(
+        SportEventJson eventJson,
+        List<CombinationOdds> combinations,
+        double surebet,
+        string eventCode,
+        string eventType,
+        string eventMarket
+    ) {
         this.EventJson = eventJson;
         Combinations = combinations;
         Surebet = surebet;
         EventCode = eventCode;
         EventType = eventType;
+        EventMarket = eventMarket;
     }
     [JsonProperty(propertyName:"event")]
     public SportEventJson EventJson {
@@ -425,6 +485,10 @@ public class EventCombination {
     }
     [JsonProperty(propertyName:"event_type")]
     public string EventType {
+        get;
+    }
+    [JsonProperty(propertyName:"event_market")]
+    public string EventMarket {
         get;
     }
 }
