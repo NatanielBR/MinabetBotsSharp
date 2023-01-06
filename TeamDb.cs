@@ -5,8 +5,7 @@ using MinabetBotsWeb.scrapper;
 
 namespace MinabetBotsWeb;
 
-public class TeamDb
-{
+public class TeamDb {
     private int changeFire;
 
     public ConcurrentDictionary<string, List<SportEvent>> eventMap = new();

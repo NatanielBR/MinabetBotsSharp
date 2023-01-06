@@ -3,8 +3,7 @@ using Newtonsoft.Json;
 
 namespace MinabetBotsWeb;
 
-public class Combinator
-{
+public class Combinator {
     private TeamDb _teamDb;
     private string eventType;
 
@@ -198,15 +197,14 @@ public class Combinator
         nList.AddRange(sportEvents);
 
         var allCombination = Combine(sportEvents.SelectMany(it => {
-                var list = new List<KeyValuePair<double, string>>();
+            var list = new List<KeyValuePair<double, string>>();
 
-                list.Add(KeyValuePair.Create(it.odds.home_win_odds, "home"));
-                list.Add(KeyValuePair.Create(it.odds.draw_odds, "draw"));
-                list.Add(KeyValuePair.Create(it.odds.away_win_odds, "away"));
+            list.Add(KeyValuePair.Create(it.odds.home_win_odds, "home"));
+            list.Add(KeyValuePair.Create(it.odds.draw_odds, "draw"));
+            list.Add(KeyValuePair.Create(it.odds.away_win_odds, "away"));
 
-                return list.Select(it2 => new CombinationItem(it2.Key, it2.Value, it.sourceName));
-            }).ToList()
-        );
+            return list.Select(it2 => new CombinationItem(it2.Key, it2.Value, it.sourceName));
+        }).ToList());
 
         var bestCombination = allCombination.MaxBy(CalculateSurebet);
 
@@ -218,17 +216,13 @@ public class Combinator
 
         var surebet = CalculateSurebet(bestCombination);
 
-        return new EventCombination(
-            sportEvent.ToEventJson(),
-            converted.Select(it => new CombinationOdds(
-                it.Label,
+        return new EventCombination(sportEvent.ToEventJson(),
+            converted.Select(it => new CombinationOdds(it.Label,
                 it.Odd,
-                nList.First(it2 => it2.sourceName == it.SourceName).ToEventJson()
-            )).ToList(),
+                nList.First(it2 => it2.sourceName == it.SourceName).ToEventJson())).ToList(),
             surebet,
             key,
-            eventType
-        );
+            eventType);
     }
 
     private EventCombination FindBestCombination2Options(IEnumerable<SportEvent> sportEvents, SportEvent sportEvent, string key) {
@@ -236,14 +230,13 @@ public class Combinator
         nList.AddRange(sportEvents);
 
         var allCombination = Combine2Options(sportEvents.SelectMany(it => {
-                var list = new List<KeyValuePair<double, string>>();
+            var list = new List<KeyValuePair<double, string>>();
 
-                list.Add(KeyValuePair.Create(it.odds.more2and5odds, "more25"));
-                list.Add(KeyValuePair.Create(it.odds.less2and5odds, "less25"));
+            list.Add(KeyValuePair.Create(it.odds.more2and5odds, "more25"));
+            list.Add(KeyValuePair.Create(it.odds.less2and5odds, "less25"));
 
-                return list.Select(it2 => new CombinationItem(it2.Key, it2.Value, it.sourceName));
-            }).ToList()
-        );
+            return list.Select(it2 => new CombinationItem(it2.Key, it2.Value, it.sourceName));
+        }).ToList());
 
         var bestCombination = allCombination.MaxBy(CalculateSurebet);
 
@@ -254,55 +247,72 @@ public class Combinator
 
         var surebet = CalculateSurebet(bestCombination);
 
-        return new EventCombination(
-            sportEvent.ToEventJson(),
-            converted.Select(it => new CombinationOdds(
-                it.Label,
+        return new EventCombination(sportEvent.ToEventJson(),
+            converted.Select(it => new CombinationOdds(it.Label,
                 it.Odd,
-                nList.First(it2 => it2.sourceName == it.SourceName).ToEventJson()
-            )).ToList(),
+                nList.First(it2 => it2.sourceName == it.SourceName).ToEventJson())).ToList(),
             surebet,
             key,
-            eventType
-        );
+            eventType);
     }
 }
 
-public class ThreeValues<T>
-{
+public class ThreeValues<T> {
 
     public ThreeValues(T one, T two, T three) {
         One = one;
         Two = two;
         Three = three;
     }
-    public T One { get; set; }
-    public T Two { get; set; }
-    public T Three { get; set; }
+    public T One {
+        get;
+        set;
+    }
+    public T Two {
+        get;
+        set;
+    }
+    public T Three {
+        get;
+        set;
+    }
 }
 
-public class TwoValues<T>
-{
+public class TwoValues<T> {
 
     public TwoValues(T one, T two) {
         One = one;
         Two = two;
     }
-    public T One { get; set; }
-    public T Two { get; set; }
+    public T One {
+        get;
+        set;
+    }
+    public T Two {
+        get;
+        set;
+    }
 }
 
-class ThreeValuesNullable<T>
-{
+class ThreeValuesNullable<T> {
 
     public ThreeValuesNullable(T? one, T? two, T? three) {
         One = one;
         Two = two;
         Three = three;
     }
-    public T? One { get; set; }
-    public T? Two { get; set; }
-    public T? Three { get; set; }
+    public T? One {
+        get;
+        set;
+    }
+    public T? Two {
+        get;
+        set;
+    }
+    public T? Three {
+        get;
+        set;
+    }
 
     public bool HasSpace() {
         return One == null || Two == null || Three == null;
@@ -323,15 +333,20 @@ class ThreeValuesNullable<T>
     }
 }
 
-class TwoValuesNullable<T>
-{
+class TwoValuesNullable<T> {
 
     public TwoValuesNullable(T? one, T? two) {
         One = one;
         Two = two;
     }
-    public T? One { get; set; }
-    public T? Two { get; set; }
+    public T? One {
+        get;
+        set;
+    }
+    public T? Two {
+        get;
+        set;
+    }
 
     public bool HasSpace() {
         return One == null || Two == null;
@@ -350,17 +365,22 @@ class TwoValuesNullable<T>
     }
 }
 
-public class CombinationItem
-{
+public class CombinationItem {
 
     public CombinationItem(double odd, string label, string sourceName) {
         Odd = odd;
         Label = label;
         SourceName = sourceName;
     }
-    public double Odd { get; }
-    public string Label { get; }
-    public string SourceName { get; }
+    public double Odd {
+        get;
+    }
+    public string Label {
+        get;
+    }
+    public string SourceName {
+        get;
+    }
 
     public override bool Equals(object? obj) {
         if (obj is CombinationItem comb) {
@@ -375,8 +395,7 @@ public class CombinationItem
     }
 }
 
-public class EventCombination
-{
+public class EventCombination {
 
     [JsonIgnore]
     public DateTimeOffset Created = DateTimeOffset.Now;
@@ -389,19 +408,28 @@ public class EventCombination
         EventType = eventType;
     }
     [JsonProperty(propertyName:"event")]
-    public SportEventJson EventJson { get; }
+    public SportEventJson EventJson {
+        get;
+    }
     [JsonProperty(propertyName:"combinations")]
-    public List<CombinationOdds> Combinations { get; }
+    public List<CombinationOdds> Combinations {
+        get;
+    }
     [JsonProperty(propertyName:"surebet")]
-    public double Surebet { get; }
+    public double Surebet {
+        get;
+    }
     [JsonProperty(propertyName:"eventCode")]
-    public string EventCode { get; }
+    public string EventCode {
+        get;
+    }
     [JsonProperty(propertyName:"event_type")]
-    public string EventType { get; }
+    public string EventType {
+        get;
+    }
 }
 
-public class CombinationOdds
-{
+public class CombinationOdds {
 
     public CombinationOdds(string label, double odds, SportEventJson eventJson) {
         Label = label;
@@ -409,15 +437,20 @@ public class CombinationOdds
         EventJson = eventJson;
     }
     [JsonProperty(propertyName:"label")]
-    public string Label { get; }
+    public string Label {
+        get;
+    }
     [JsonProperty(propertyName:"odds")]
-    public double Odds { get; }
+    public double Odds {
+        get;
+    }
     [JsonProperty(propertyName:"event")]
-    public SportEventJson EventJson { get; }
+    public SportEventJson EventJson {
+        get;
+    }
 }
 
-public class SportEventJson
-{
+public class SportEventJson {
 
     public SportEventJson(string eventId, string champEventId, string championshipId, string championshipName, string dateStared, string teamHomeName, string teamAwayName, EventOdds odds, string sourceName, string url) {
         EventId = eventId;
@@ -432,23 +465,43 @@ public class SportEventJson
         Url = url;
     }
     [JsonProperty(propertyName:"eventId")]
-    private string EventId { get; }
+    private string EventId {
+        get;
+    }
     [JsonProperty(propertyName:"champEventId")]
-    private string ChampEventId { get; }
+    private string ChampEventId {
+        get;
+    }
     [JsonProperty(propertyName:"championshipId")]
-    private string ChampionshipId { get; }
+    private string ChampionshipId {
+        get;
+    }
     [JsonProperty(propertyName:"championshipName")]
-    private string ChampionshipName { get; }
+    private string ChampionshipName {
+        get;
+    }
     [JsonProperty(propertyName:"dateStarted")]
-    private string DateStared { get; } // iso
+    private string DateStared {
+        get;
+    } // iso
     [JsonProperty(propertyName:"teamHomeName")]
-    public string TeamHomeName { get; }
+    public string TeamHomeName {
+        get;
+    }
     [JsonProperty(propertyName:"teamAwayName")]
-    public string TeamAwayName { get; }
+    public string TeamAwayName {
+        get;
+    }
     [JsonProperty(propertyName:"odds")]
-    private EventOdds Odds { get; }
+    private EventOdds Odds {
+        get;
+    }
     [JsonProperty(propertyName:"sourceName")]
-    private string SourceName { get; }
+    private string SourceName {
+        get;
+    }
     [JsonProperty(propertyName:"url")]
-    private string Url { get; }
+    private string Url {
+        get;
+    }
 }
