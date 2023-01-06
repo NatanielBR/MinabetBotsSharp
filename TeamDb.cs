@@ -5,25 +5,24 @@ using MinabetBotsWeb.scrapper;
 
 namespace MinabetBotsWeb;
 
-public class TeamDb {
+public class TeamDb
+{
     private int changeFire;
 
     public ConcurrentDictionary<string, List<SportEvent>> eventMap = new();
     private double minRatio;
+    private bool RemoverEventoAntigo;
     private JaroWinkler similarity = new();
 
-    public TeamDb(double minRatio = 0.3, int changeFire = 2) {
+    public TeamDb(double minRatio = 0.3, int changeFire = 2, bool RemoverEventoAntigo = false) {
         this.minRatio = minRatio;
         this.changeFire = changeFire;
+        this.RemoverEventoAntigo = RemoverEventoAntigo;
     }
 
-    public List<SportEvent> this[string key] {
+    public List<SportEvent>? this[string key] {
         get {
-            return eventMap[key];
-        }
-
-        set {
-            eventMap[key] = value;
+            return eventMap.TryGetValue(key, out var saida) ? saida : null;
         }
     }
 
@@ -60,6 +59,30 @@ public class TeamDb {
         if (changeList.Count > 0) {
             OnChangeList?.Invoke(this, changeList);
         }
+
+        if (RemoverEventoAntigo) {
+            RemoverEventosAoVivo();
+        }
+    }
+
+    private void RemoverEventosAoVivo() {
+        var dateNow = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+        var keysInLive = eventMap.Keys
+            .Select(it => KeyValuePair.Create(eventMap[it][0], it))
+            /*
+             * Ou seja, se agora é 15:00 e o evento seja:
+             * 14:00 -> A diferença é de -1 (14 - 15), ou seja o evento já aconteceu ou esta ao vivo
+             * 16:00 -> A diferença é de +1 (16 - 15), ou seja o evento ainda não começou
+             *
+             * No caso eu quero todos os eventos que já começou
+             */
+            .Where(it => it.Key.dateStarted?.ToUnixTimeSeconds() - dateNow <= 0)
+            .ToList();
+
+        keysInLive.ForEach(it => {
+            eventMap.Remove(it.Value, out _);
+        });
     }
 
     private KeyValuePair<string, double>? findKey(SportEvent sportEvent) {

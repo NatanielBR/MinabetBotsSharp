@@ -128,19 +128,22 @@ public class ProgramConfig
         EventType = "soccer";
         ThreadSleepMs = 4000;
         SendEventsToList = true;
+        RemoveEventInLive = false;
     }
 
-    public ProgramConfig(string djangoUrl, string eventType, bool sendEventsToList) {
+    public ProgramConfig(string djangoUrl, string eventType, bool sendEventsToList, bool RemoveEventInLive) {
         DjangoUrl = djangoUrl;
         EventType = eventType;
         SendEventsToList = sendEventsToList;
+        this.RemoveEventInLive = RemoveEventInLive;
     }
     public string DjangoUrl { get; set; }
     public string EventType { get; set; }
     public int ThreadSleepMs { get; set; }
     public bool SendEventsToList { get; set; }
+    public bool RemoveEventInLive { get; set; }
 
     public override string ToString() {
-        return $"{nameof(DjangoUrl)}: {DjangoUrl}, {nameof(EventType)}: {EventType}, {nameof(ThreadSleepMs)}: {ThreadSleepMs}";
+        return $"{nameof(DjangoUrl)}: {DjangoUrl}, {nameof(EventType)}: {EventType}, {nameof(ThreadSleepMs)}: {ThreadSleepMs}, {nameof(SendEventsToList)}: {SendEventsToList}, {nameof(RemoveEventInLive)}: {RemoveEventInLive}";
     }
 }

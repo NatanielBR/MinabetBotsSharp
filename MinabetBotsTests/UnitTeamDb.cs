@@ -7,7 +7,8 @@ using Newtonsoft.Json;
 
 namespace MinabetBotsTest;
 
-public class UnitTeamDb {
+public class UnitTeamDb
+{
     public static SportEvent CreateTestEvent(
         DateTimeOffset date,
         string teamHome,
@@ -92,9 +93,37 @@ public class UnitTeamDb {
         teamDb.PutAll(list);
 
         Assert.Multiple(() => {
-            Assert.That(teamDb.eventMap.Count >= 1, Is.True);
-            Assert.That(teamDb.eventMap.First().Value.Count >= 3, Is.True);
+            Assert.That(teamDb.eventMap.Count == 1, Is.True);
+            Assert.That(teamDb.eventMap.First().Value.Count == 3, Is.True);
             Assert.That(fired, Is.True);
+        });
+    }
+
+    /**
+     * Irá testar a função de remover um evento caso esteja ao vivo
+     */
+    [Test]
+    public void TestTeamDBFeature() {
+        var teamDb = new TeamDb(changeFire:3, RemoverEventoAntigo:true);
+
+        var list = new List<SportEvent>();
+        var date = DateTimeOffset.Now;
+
+        list.Add(CreateTestEvent(date, "Al Kuwait SC Sub-21", "Al Salmiyah SC Sub-21", "Casa A"));
+        list.Add(CreateTestEvent(date, "Al Kuwait SC Sub-21", "Al Salmiyah SC Sub-21", "Casa B"));
+
+        Thread.Sleep(TimeSpan.FromSeconds(5));
+        // Evento se tornou ao vivo, deve remover esse evento
+        teamDb.PutAll(list);
+
+        // Simulando um novo evento, com data diferente
+        teamDb.PutAll(new() {
+            CreateTestEvent(date.AddMinutes(1), "Time A", "TimeB", "Casa A")
+        });
+
+        Assert.Multiple(() => {
+            Assert.That(teamDb.eventMap.Count, Is.EqualTo(1));
+            Assert.That(teamDb.eventMap.First().Value.Count, Is.EqualTo(1));
         });
     }
 

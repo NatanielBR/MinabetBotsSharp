@@ -3,7 +3,8 @@ using Newtonsoft.Json;
 
 namespace MinabetBotsWeb;
 
-public class Combinator {
+public class Combinator
+{
     private TeamDb _teamDb;
     private string eventType;
 
@@ -22,7 +23,7 @@ public class Combinator {
         sportEventNames.ForEach(sportEventName => {
             var value = _teamDb[sportEventName];
 
-            if (value.Count < 3) return;
+            if (value == null || value.Count < 3) return;
 
             var combination = FindBestCombination(value, value[0], sportEventName);
             map.TryGetValue(sportEventName, out var lastCombination);
@@ -267,7 +268,8 @@ public class Combinator {
     }
 }
 
-public class ThreeValues<T> {
+public class ThreeValues<T>
+{
 
     public ThreeValues(T one, T two, T three) {
         One = one;
@@ -279,7 +281,8 @@ public class ThreeValues<T> {
     public T Three { get; set; }
 }
 
-public class TwoValues<T> {
+public class TwoValues<T>
+{
 
     public TwoValues(T one, T two) {
         One = one;
@@ -289,7 +292,8 @@ public class TwoValues<T> {
     public T Two { get; set; }
 }
 
-class ThreeValuesNullable<T> {
+class ThreeValuesNullable<T>
+{
 
     public ThreeValuesNullable(T? one, T? two, T? three) {
         One = one;
@@ -319,7 +323,8 @@ class ThreeValuesNullable<T> {
     }
 }
 
-class TwoValuesNullable<T> {
+class TwoValuesNullable<T>
+{
 
     public TwoValuesNullable(T? one, T? two) {
         One = one;
@@ -345,7 +350,8 @@ class TwoValuesNullable<T> {
     }
 }
 
-public class CombinationItem {
+public class CombinationItem
+{
 
     public CombinationItem(double odd, string label, string sourceName) {
         Odd = odd;
@@ -369,7 +375,8 @@ public class CombinationItem {
     }
 }
 
-public class EventCombination {
+public class EventCombination
+{
 
     [JsonIgnore]
     public DateTimeOffset Created = DateTimeOffset.Now;
@@ -393,7 +400,8 @@ public class EventCombination {
     public string EventType { get; }
 }
 
-public class CombinationOdds {
+public class CombinationOdds
+{
 
     public CombinationOdds(string label, double odds, SportEventJson eventJson) {
         Label = label;
@@ -408,7 +416,8 @@ public class CombinationOdds {
     public SportEventJson EventJson { get; }
 }
 
-public class SportEventJson {
+public class SportEventJson
+{
 
     public SportEventJson(string eventId, string champEventId, string championshipId, string championshipName, string dateStared, string teamHomeName, string teamAwayName, EventOdds odds, string sourceName, string url) {
         EventId = eventId;
