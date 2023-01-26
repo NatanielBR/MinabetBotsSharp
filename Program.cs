@@ -10,7 +10,7 @@ var timer = new Stopwatch();
 
 timer.Start();
 Console.WriteLine($"Program Start - {timer.Elapsed}");
-
+//teste leo
 //Console.Out.WriteLine(String.Join("\n", betsBola.ListEvents().Select(item => item.ToString())));
 //Console.Out.WriteLine(String.Join("\n", betano.ListEvents().Select(item => item.ToString())));
 Console.Out.WriteLine(String.Join("\n", pansudo.ListEvents().Select(item => item.ToString())));
