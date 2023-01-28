@@ -10,6 +10,21 @@
         public double? P { get; set; }
     }
 
+    public class AE
+    {
+        public double G { get; set; }
+        public List<ME> ME { get; set; }
+    }
+
+    public class ME
+    {
+        public double C { get; set; }
+        public int G { get; set; }
+        public int T { get; set; }
+        public double? P { get; set; }
+        public int? CE { get; set; }
+    }
+
     public class MI
     {
         public int K { get; set; }
@@ -31,6 +46,7 @@
         public int CI { get; set; }
         public int COI { get; set; }
         public List<E> E { get; set; }
+        public List<AE> AE { get; set; }
         public int I { get; set; }
         public int KI { get; set; }
         public string L { get; set; }
