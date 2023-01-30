@@ -26,4 +26,8 @@
       <None Remove="MinabetBotsTests\**" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="scrapper\Betfair\Models\" />
+    </ItemGroup>
+
 </Project>
