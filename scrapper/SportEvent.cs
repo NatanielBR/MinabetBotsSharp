@@ -13,7 +13,8 @@ public class SportEvent {
     public readonly string sourceName;
     public readonly string url;
 
-    public SportEvent(string eventId, string champEventId, string championshipId, string championshipName, DateTimeOffset dateStarted, string teamHomeName, string teamAwayName, EventOdds odds, string sourceName, string url) {
+    public SportEvent(string eventId, string champEventId, string championshipId, string championshipName, 
+        DateTimeOffset dateStarted, string teamHomeName, string teamAwayName, EventOdds odds, string sourceName, string url) {
         this.eventId = eventId;
         this.champEventId = champEventId;
         this.championshipId = championshipId;
@@ -46,6 +47,7 @@ public class SportEvent {
     }
 }
 
+/*1x2*/
 public class EventOdds {
     public readonly double home_win_odds;
     public readonly double away_win_odds;
@@ -61,4 +63,32 @@ public class EventOdds {
         less2and5odds = less2And5Odds;
     }
 
+}
+
+/*Resultado final*/
+public class EventOddsResultFinish
+{
+    public readonly double home_win_odds;
+    public readonly double away_win_odds;
+    public readonly double draw_odds;
+    public EventOddsResultFinish(double homeWinOdds, double awayWinOdds, double drawOdds)
+    {
+        home_win_odds = homeWinOdds;
+        away_win_odds = awayWinOdds;
+        draw_odds = drawOdds;
+    }
+}
+
+/*Chance dupla*/
+public class EventDoubleChance
+{
+    public readonly double home_and_draw_odds;
+    public readonly double away_and_draw_odds;
+    public readonly double home_and_away_odds;
+    public EventDoubleChance(double homeAndDrawOdds, double awayAndDrawOdds, double HomeAndAwayOdds)
+    {
+        home_and_draw_odds = homeAndDrawOdds;
+        away_and_draw_odds = awayAndDrawOdds;
+        home_and_away_odds = HomeAndAwayOdds;
+    }
 }
