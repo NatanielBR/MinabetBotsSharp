@@ -54,13 +54,18 @@ public class EventOdds {
     public readonly double draw_odds;
     public double more2and5odds;
     public double less2and5odds;
+    public EventOddsResultFinish? event_odd_result_finish;
+    public EventOddsDoubleChance? event_odds_double_chance;
 
-    public EventOdds(double homeWinOdds, double awayWinOdds, double drawOdds, double more2And5Odds, double less2And5Odds) {
+    public EventOdds(double homeWinOdds, double awayWinOdds, double drawOdds, double more2And5Odds, double less2And5Odds,
+        EventOddsResultFinish? eventOddsResultFinish, EventOddsDoubleChance? eventOddsDoubleChance) {
         home_win_odds = homeWinOdds;
         away_win_odds = awayWinOdds;
         draw_odds = drawOdds;
         more2and5odds = more2And5Odds;
         less2and5odds = less2And5Odds;
+        event_odd_result_finish = eventOddsResultFinish;
+        event_odds_double_chance = eventOddsDoubleChance;
     }
 
 }
@@ -80,12 +85,12 @@ public class EventOddsResultFinish
 }
 
 /*Chance dupla*/
-public class EventDoubleChance
+public class EventOddsDoubleChance
 {
     public readonly double home_and_draw_odds;
     public readonly double away_and_draw_odds;
     public readonly double home_and_away_odds;
-    public EventDoubleChance(double homeAndDrawOdds, double awayAndDrawOdds, double HomeAndAwayOdds)
+    public EventOddsDoubleChance(double homeAndDrawOdds, double awayAndDrawOdds, double HomeAndAwayOdds)
     {
         home_and_draw_odds = homeAndDrawOdds;
         away_and_draw_odds = awayAndDrawOdds;

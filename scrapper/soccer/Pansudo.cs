@@ -23,7 +23,7 @@ namespace MinabetBotsWeb.scrapper.soccer
                 var oddsMore2and5 = odds.Find(x => x.Descricao == "Jogo - Acima 2.5");
                 var oddsLess2and5 = odds.Find(x => x.Descricao == "Jogo - Abaixo 2.5");
                 if (oddsLess2and5 == null || oddsLess2and5 == null) return;
-                eventsSportsData.Add(new(gameChampData.EventId, gameChampData.CampJogoId, gameChampData.CampId, gameChampData.CampName, gameChampData.DataInicio, gameChampData.TimeCasa, gameChampData.TimeVisitante, new(gameChampData.PansudoEventOdds[0].Taxa, gameChampData.PansudoEventOdds[2].Taxa, gameChampData.PansudoEventOdds[1].Taxa, oddsMore2and5.Taxa, oddsLess2and5.Taxa), "Pansuro", urlHome));
+                eventsSportsData.Add(new(gameChampData.EventId, gameChampData.CampJogoId, gameChampData.CampId, gameChampData.CampName, gameChampData.DataInicio, gameChampData.TimeCasa, gameChampData.TimeVisitante, new(gameChampData.PansudoEventOdds[0].Taxa, gameChampData.PansudoEventOdds[2].Taxa, gameChampData.PansudoEventOdds[1].Taxa, oddsMore2and5.Taxa, oddsLess2and5.Taxa, null, null), "Pansuro", urlHome));
             });
 
             return eventsSportsData;

@@ -86,7 +86,9 @@ public class BetsBola : BetApi {
                                 oddsValues[2],
                                 oddsValues[1],
                                 0.0d,
-                                0.0d
+                                0.0d,
+                                null,
+                                null
                             ),
                             webSiteName
                             ,
