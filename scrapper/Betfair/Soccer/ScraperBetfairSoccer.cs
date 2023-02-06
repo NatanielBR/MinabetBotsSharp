@@ -51,7 +51,7 @@ namespace MinabetBotsWeb.scrapper.Betfair.Soccer
                     oddWinHome = string.IsNullOrWhiteSpace(oddWinHome) ? "0" : oddWinHome;
                     oddDraw = string.IsNullOrWhiteSpace(oddDraw) ? "0" : oddDraw;
                     oddWinAway = string.IsNullOrWhiteSpace(oddWinAway) ? "0" : oddWinAway;
-                    var odd = new EventOdds(Convert.ToDouble(oddWinHome), Convert.ToDouble(oddWinAway), Convert.ToDouble(oddDraw), 0.0d, 0.0d, null, null);
+                    var odd = new EventOdds(Convert.ToDouble(oddWinHome), Convert.ToDouble(oddWinAway), Convert.ToDouble(oddDraw), 0.0d, 0.0d, null, null, null, null, null, null);
                     DateTimeOffset dataAtual = DateTimeOffset.Now;
 
                     events.Add(new SportEvent(eventId, eventChampId, "", champName, dataAtual, teamHome, teamAway, odd, webSiteName, $"{urlBase}{url}"));
@@ -65,6 +65,11 @@ namespace MinabetBotsWeb.scrapper.Betfair.Soccer
                 Thread.Sleep(400);
                 FillMercadoDeGol(item);
                 FillMercadoResultadoFinal(item);
+                FillMercadoChanceDupla(item);
+                FillMercadoAmbosTimesMarcam(item);
+                FillMercadoEscanteios(item);
+                FillMercadoHandcaps(item);
+                FillMercadoResultadoFinal1And5(item);
             });
             return events;
         }
@@ -153,6 +158,203 @@ namespace MinabetBotsWeb.scrapper.Betfair.Soccer
                     if (string.IsNullOrWhiteSpace(drawOdd)) drawOdd = "0";
 
                     sportEvent.odds.event_odd_result_finish = new EventOddsResultFinish(double.Parse(homeWinOdd), double.Parse(awayWinOdd), double.Parse(drawOdd));
+                }
+            }
+            catch (Exception)
+            {
+                return;
+            }
+        }
+
+        private void FillMercadoChanceDupla(SportEvent sportEvent)
+        {
+            try
+            {
+                var doc = web.Load(sportEvent.url);
+
+
+                if (doc == null || sportEvent.odds == null)
+                {
+                    return;
+                }
+
+                var ListOdds = doc.DocumentNode.SelectNodes("//div[contains(@class, 'minimarket-DOUBLE_CHANCE')]/ul[contains(@class, 'runner-list3')]/li[contains(@class, 'runner-item')]/a");
+
+                if (ListOdds == null)
+                {
+                    return;
+                }
+
+                if ((sportEvent?.odds?.event_odds_double_chance ?? null) == null)
+                {
+                    var homeAndDrawOdd = ListOdds[0].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+                    var awayAndDrawOdd = ListOdds[2].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+                    var HomeAndAwayOdd = ListOdds[1].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+
+                    if (string.IsNullOrWhiteSpace(homeAndDrawOdd)) homeAndDrawOdd = "0";
+                    if (string.IsNullOrWhiteSpace(awayAndDrawOdd)) awayAndDrawOdd = "0";
+                    if (string.IsNullOrWhiteSpace(HomeAndAwayOdd)) HomeAndAwayOdd = "0";
+
+                    sportEvent.odds.event_odds_double_chance = new EventOddsDoubleChance(double.Parse(homeAndDrawOdd), double.Parse(awayAndDrawOdd), double.Parse(HomeAndAwayOdd));
+                }
+            }
+            catch (Exception)
+            {
+                return;
+            }
+        }
+
+        private void FillMercadoAmbosTimesMarcam(SportEvent sportEvent)
+        {
+            try
+            {
+                var doc = web.Load(sportEvent.url);
+
+
+                if (doc == null || sportEvent.odds == null)
+                {
+                    return;
+                }
+
+                var ListOdds = doc.DocumentNode.SelectNodes("//div[contains(@class, 'minimarket-BOTH_TEAMS_TO_SCORE')]/ul[contains(@class, 'runner-list2')]/li[contains(@class, 'runner-item')]/a");
+
+                if (ListOdds == null)
+                {
+                    return;
+                }
+
+                if ((sportEvent?.odds?.event_odds_both_teams_score ?? null) == null)
+                {
+                    var yesOdd = ListOdds[0].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+                    var noOdd = ListOdds[1].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+                   
+                    if (string.IsNullOrWhiteSpace(yesOdd)) yesOdd = "0";
+                    if (string.IsNullOrWhiteSpace(noOdd)) noOdd = "0";
+
+                    sportEvent.odds.event_odds_both_teams_score = new EventOddsBothTeamsScore(double.Parse(yesOdd), double.Parse(noOdd));
+                }
+            }
+            catch (Exception)
+            {
+                return;
+            }
+        }
+
+        private void FillMercadoEscanteios(SportEvent sportEvent)
+        {
+            try
+            {
+                var doc = web.Load(sportEvent.url);
+
+
+                if (doc == null || sportEvent.odds == null)
+                {
+                    return;
+                }
+
+                var ListOdds = doc.DocumentNode.SelectNodes("//div[contains(@class, 'minimarket-CORNERS_MATCH_BET')]/ul[contains(@class, 'runner-list3')]/li[contains(@class, 'runner-item')]/a");
+
+                if (ListOdds == null)
+                {
+                    return;
+                }
+
+                if ((sportEvent?.odds?.event_odds_corners ?? null) == null)
+                {
+                    var homeOdd = ListOdds[0].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+                    var drawOdd = ListOdds[1].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+                    var awayOdd = ListOdds[2].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+
+                    if (string.IsNullOrWhiteSpace(homeOdd)) homeOdd = "0";
+                    if (string.IsNullOrWhiteSpace(drawOdd)) drawOdd = "0";
+                    if (string.IsNullOrWhiteSpace(awayOdd)) awayOdd = "0";
+
+                    sportEvent.odds.event_odds_corners = new EventOddsCorners(double.Parse(homeOdd), double.Parse(drawOdd), double.Parse(awayOdd));
+                }
+            }
+            catch (Exception)
+            {
+                return;
+            }
+        }
+
+        private void FillMercadoHandcaps(SportEvent sportEvent)
+        {
+            try
+            {
+                var doc = web.Load(sportEvent.url);
+
+
+                if (doc == null || sportEvent.odds == null)
+                {
+                    return;
+                }
+
+                var ListOdds = doc.DocumentNode.SelectNodes("//div[contains(@class, 'minimarket-MATCH_HANDICAP_WITH_TIE')]/ul[contains(@class, 'runner-list3')]/li[contains(@class, 'runner-item')]/a");
+
+                if (ListOdds == null)
+                {
+                    return;
+                }
+
+                if ((sportEvent?.odds?.event_odds_corners ?? null) == null)
+                {
+                    var homeOdd = ListOdds[0].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+                    var drawOdd = ListOdds[1].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+                    var awayOdd = ListOdds[2].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+
+                    if (string.IsNullOrWhiteSpace(homeOdd)) homeOdd = "0";
+                    if (string.IsNullOrWhiteSpace(drawOdd)) drawOdd = "0";
+                    if (string.IsNullOrWhiteSpace(awayOdd)) awayOdd = "0";
+
+                    sportEvent.odds.event_odds_handcaps = new EventOddsHandcaps(double.Parse(homeOdd), double.Parse(drawOdd), double.Parse(awayOdd));
+                }
+            }
+            catch (Exception)
+            {
+                return;
+            }
+        }
+
+        private void FillMercadoResultadoFinal1And5(SportEvent sportEvent)
+        {
+            try
+            {
+                var doc = web.Load(sportEvent.url);
+
+
+                if (doc == null || sportEvent.odds == null)
+                {
+                    return;
+                }
+
+                var ListOdds = doc.DocumentNode.SelectNodes("//div[contains(@class, 'minimarket-MATCH_ODDS_AND_OVERUNDER_15_GOALS')]/ul[contains(@class, 'runner-list2')]/li[contains(@class, 'runner-item')]/a");
+
+                if (ListOdds == null)
+                {
+                    return;
+                }
+
+                if ((sportEvent?.odds?.event_odds_corners ?? null) == null)
+                {
+                    var homeMore1and5Odd = ListOdds[0].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+                    var drawMore1and5Odd = ListOdds[1].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+                    var awayMore1And5Odd = ListOdds[2].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+
+                    var homeAnyless1and5Odd = ListOdds[0].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+                    var drawAnyless1and5Odd = ListOdds[1].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+                    var awayAnyless1And5Odd = ListOdds[2].InnerText.Replace("\n", "").Replace("&nbsp;", "").Replace(".", ",");
+
+
+                    if (string.IsNullOrWhiteSpace(homeMore1and5Odd)) homeMore1and5Odd = "0";
+                    if (string.IsNullOrWhiteSpace(drawMore1and5Odd)) drawMore1and5Odd = "0";
+                    if (string.IsNullOrWhiteSpace(awayMore1And5Odd)) awayMore1And5Odd = "0";
+                    if (string.IsNullOrWhiteSpace(homeAnyless1and5Odd)) homeAnyless1and5Odd = "0";
+                    if (string.IsNullOrWhiteSpace(drawAnyless1and5Odd)) drawAnyless1and5Odd = "0";
+                    if (string.IsNullOrWhiteSpace(awayAnyless1And5Odd)) awayAnyless1And5Odd = "0";
+
+                    sportEvent.odds.event_odds_result_1and5 = new EventOddsResultFinish1And5(double.Parse(homeMore1and5Odd), double.Parse(drawMore1and5Odd), double.Parse(awayMore1And5Odd),
+                        double.Parse(homeAnyless1and5Odd), double.Parse(drawAnyless1and5Odd), double.Parse(awayAnyless1And5Odd));
                 }
             }
             catch (Exception)

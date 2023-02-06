@@ -27,7 +27,7 @@ namespace MinabetBotsWeb.scrapper._1XBet.soccer
                 if (e.AE.Count < 2) return;
                 var oddsMore2and5 = e.AE[1].ME.Where(e => e.P == 2.5)?.ToList();
                 if (oddsMore2and5 == null || oddsMore2and5.Count == 0) return;
-                eventsSportsData.Add(new(e.I.ToString(), e.LI.ToString(), e.CI.ToString(), e.L, DateTime.Now, e.O1, e.O2, new(e.E[0].C, e.E[2].C, e.E[1].C, oddsMore2and5[0].C, oddsMore2and5[1].C, null, null), "1XBET", urlHome));
+                eventsSportsData.Add(new(e.I.ToString(), e.LI.ToString(), e.CI.ToString(), e.L, DateTime.Now, e.O1, e.O2, new(e.E[0].C, e.E[2].C, e.E[1].C, oddsMore2and5[0].C, oddsMore2and5[1].C, null, null, null, null, null, null), "1XBET", urlHome));
             });
             return eventsSportsData;
         }
