@@ -61,6 +61,10 @@ public class EventOdds
     public double less2and5odds;
     public EventOddsResultFinish? event_odd_result_finish;
     public EventOddsDoubleChance? event_odds_double_chance;
+    public EventOddsBothTeamsScore? event_odds_both_teams_score;
+    public EventOddsCorners? event_odds_corners;
+    public EventOddsHandcaps? event_odds_handcaps;
+    public EventOddsResultFinish1And5? event_odds_result_1and5;
     public EventOddsTotalGoals1and5? event_odds_total_1and5;
     public Dictionary<string, dynamic> MapTest { get; set; }
 
@@ -70,8 +74,9 @@ public class EventOdds
     }
 
     public EventOdds(double homeWinOdds, double awayWinOdds, double drawOdds, double more2And5Odds, double less2And5Odds,
-        EventOddsResultFinish? eventOddsResultFinish, EventOddsDoubleChance? eventOddsDoubleChance, EventOddsTotalGoals1and5? eventOddsTotalGoals1And5)
-    {
+        EventOddsResultFinish? eventOddsResultFinish, EventOddsDoubleChance? eventOddsDoubleChance,
+        EventOddsBothTeamsScore? eventOddsBothTeamsScore, EventOddsCorners? eventOddsCorners,
+        EventOddsHandcaps? eventOddsHandcaps, EventOddsResultFinish1And5? eventOddsResultFinish1And5) {
         home_win_odds = homeWinOdds;
         away_win_odds = awayWinOdds;
         draw_odds = drawOdds;
@@ -79,7 +84,10 @@ public class EventOdds
         less2and5odds = less2And5Odds;
         event_odd_result_finish = eventOddsResultFinish;
         event_odds_double_chance = eventOddsDoubleChance;
-        event_odds_total_1and5 = eventOddsTotalGoals1And5;
+        event_odds_both_teams_score = eventOddsBothTeamsScore;
+        event_odds_corners= eventOddsCorners;
+        event_odds_handcaps = eventOddsHandcaps;
+        event_odds_result_1and5 = eventOddsResultFinish1And5;
     }
 
 }
@@ -110,6 +118,69 @@ public class EventOddsDoubleChance
         away_and_draw_odds = awayAndDrawOdds;
         home_and_away_odds = HomeAndAwayOdds;
     }
+}
+
+/*Resultado final 1,5*/
+public class EventOddsResultFinish1And5
+{
+    public readonly double home_more_1and5_odds;
+    public readonly double draw_more_1and5_odds;
+    public readonly double away_more_1and5_odds;
+
+    public readonly double home_anyless_1and5_odds;
+    public readonly double draw_anyless_1and5_odds;
+    public readonly double away_anyless_1and5_odds;
+    public EventOddsResultFinish1And5(double homeMore1and5Odds, double drawMore1and5Odds, double awayMore1and5Odds,
+        double homeAnyless1and5Odds, double drawAnyless1and5Odds, double awayAnyless1and5Odds)
+    {
+        home_more_1and5_odds = homeMore1and5Odds;
+        draw_more_1and5_odds = drawMore1and5Odds;
+        away_more_1and5_odds = awayMore1and5Odds;
+        home_anyless_1and5_odds = homeAnyless1and5Odds;
+        draw_anyless_1and5_odds = drawAnyless1and5Odds;
+        away_anyless_1and5_odds = awayAnyless1and5Odds;
+    }
+}
+
+/*Ambos os times marcam*/
+public class EventOddsBothTeamsScore
+{
+    public readonly double yes_odds;
+    public readonly double no_odds;
+    public EventOddsBothTeamsScore(double yesOdds, double noOdds)
+    {
+        yes_odds = yesOdds;
+        no_odds = noOdds;
+    }
+}
+
+/*Escanteios*/
+public class EventOddsCorners
+{
+    public readonly double home_odds;
+    public readonly double draw_odds;
+    public readonly double away_odds;
+    public EventOddsCorners(double homeOdds, double drawOdds, double awayOdds)
+    {
+        home_odds = homeOdds;
+        draw_odds = drawOdds;
+        away_odds = awayOdds;
+    }
+}
+
+/*Handcaps*/
+public class EventOddsHandcaps
+{
+    public readonly double home_odds;
+    public readonly double draw_odds;
+    public readonly double away_odds;
+    public EventOddsHandcaps(double homeOdds, double drawOdds, double awayOdds)
+    {
+        home_odds = homeOdds;
+        draw_odds = drawOdds;
+        away_odds = awayOdds;
+    }
+}
 }
 
 

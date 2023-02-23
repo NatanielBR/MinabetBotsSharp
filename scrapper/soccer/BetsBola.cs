@@ -101,6 +101,9 @@ public class BetsBola : BetApi
                                 0.0d,
                                 null,
                                 null,
+                                null,
+                                null,
+                                null,
                                 null
                             ),
                             webSiteName
