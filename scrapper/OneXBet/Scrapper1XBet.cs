@@ -1,9 +1,9 @@
 ﻿using HtmlAgilityPack;
-using MinabetBotsWeb.scrapper._1XBet.models;
+using MinabetBotsWeb.scrapper.OneXBet.models;
 using Newtonsoft.Json;
 using System.Globalization;
 
-namespace MinabetBotsWeb.scrapper._1XBet
+namespace MinabetBotsWeb.scrapper.OneXBet
 {
     public class Scrapper1XBet : BetApi
     {

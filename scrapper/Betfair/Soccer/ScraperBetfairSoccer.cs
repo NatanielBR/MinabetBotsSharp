@@ -1,14 +1,5 @@
 ﻿using HtmlAgilityPack;
-using MinabetBotsWeb.scrapper._1XBet.models;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Formats.Tar;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace MinabetBotsWeb.scrapper.Betfair.Soccer
 {
@@ -51,7 +42,7 @@ namespace MinabetBotsWeb.scrapper.Betfair.Soccer
                     oddWinHome = string.IsNullOrWhiteSpace(oddWinHome) ? "0" : oddWinHome;
                     oddDraw = string.IsNullOrWhiteSpace(oddDraw) ? "0" : oddDraw;
                     oddWinAway = string.IsNullOrWhiteSpace(oddWinAway) ? "0" : oddWinAway;
-                    var odd = new EventOdds(Convert.ToDouble(oddWinHome), Convert.ToDouble(oddWinAway), Convert.ToDouble(oddDraw), 0.0d, 0.0d, null, null);
+                    var odd = new EventOdds(Convert.ToDouble(oddWinHome), Convert.ToDouble(oddWinAway), Convert.ToDouble(oddDraw), 0.0d, 0.0d, null, null, null);
                     DateTimeOffset dataAtual = DateTimeOffset.Now;
 
                     events.Add(new SportEvent(eventId, eventChampId, "", champName, dataAtual, teamHome, teamAway, odd, webSiteName, $"{urlBase}{url}"));

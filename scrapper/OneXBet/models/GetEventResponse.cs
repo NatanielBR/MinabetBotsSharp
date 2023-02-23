@@ -1,4 +1,4 @@
-﻿namespace MinabetBotsWeb.scrapper._1XBet.models
+﻿namespace MinabetBotsWeb.scrapper.OneXBet.models
 {
     // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
     public class E
